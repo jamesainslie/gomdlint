@@ -1,0 +1,13 @@
+{
+  "default": true,
+  "MD013": {
+    "line_length": 120
+  },
+  "MD033": false,
+  "MD041": false,
+  "theme": {
+    "theme": "default",
+    "suppress_emojis": false,
+    "custom_symbols": {}
+  }
+}

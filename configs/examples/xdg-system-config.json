@@ -1,0 +1,17 @@
+{
+  "default": true,
+  "MD013": {
+    "line_length": 100
+  },
+  "MD033": false,
+  "MD041": false,
+  "theme": {
+    "theme": "minimal",
+    "suppress_emojis": false,
+    "custom_symbols": {
+      "success": "[OK]",
+      "error": "[ERROR]",
+      "warning": "[WARN]"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "_comment": "Examples of the new simplified theme configuration using theme directory",
+  
+  "example1": {
+    "description": "Basic theme selection",
+    "config": {
+      "default": true,
+      "theme": "minimal"
+    }
+  },
+  
+  "example2": {
+    "description": "CI/CD configuration with theme",
+    "config": {
+      "default": true,
+      "MD013": {"line_length": 100},
+      "theme": "ascii"
+    }
+  },
+  
+  "example3": {
+    "description": "Development configuration with rich theme",
+    "config": {
+      "default": true,
+      "theme": "default"
+    }
+  },
+  
+  "example4": {
+    "description": "Custom theme (once created with 'gomdlint theme create my-theme')",
+    "config": {
+      "default": true,
+      "theme": "my-custom-theme"
+    }
+  },
+  
+  "legacy_format": {
+    "description": "Legacy theme format (still supported)",
+    "config": {
+      "default": true,
+      "theme": {
+        "theme": "default",
+        "suppress_emojis": true,
+        "custom_symbols": {
+          "success": "[PASS]",
+          "error": "[FAIL]"
+        }
+      }
+    }
+  }
+}

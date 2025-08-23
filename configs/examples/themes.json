@@ -1,0 +1,17 @@
+{
+  "default": true,
+  "MD013": {
+    "line_length": 120
+  },
+  "MD033": false,
+  "MD041": false,
+  "theme": {
+    "theme": "default",
+    "suppress_emojis": false,
+    "custom_symbols": {
+      "success": "✨",
+      "launch": "🚀"
+    }
+  },
+  "_comment": "This is the legacy theme format for backward compatibility. For new configs, use: \"theme\": \"theme_name\""
+}

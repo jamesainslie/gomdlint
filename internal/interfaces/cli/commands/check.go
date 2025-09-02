@@ -17,11 +17,14 @@ Exit code is non-zero if any violations are found.`,
 		RunE: runLint, // Reuse the lint command logic
 	}
 
-	// Inherit the same flags as lint
+	// Inherit the same command-specific flags as lint (persistent flags are inherited automatically)
 	cmd.Flags().StringSlice("ignore", []string{}, "Ignore files matching these patterns")
 	cmd.Flags().Bool("stdin", false, "Read from stdin instead of files")
 	cmd.Flags().String("stdin-name", "stdin", "Name for stdin input")
 	cmd.Flags().Bool("dot", false, "Include hidden files and directories")
+	cmd.Flags().Bool("fix", false, "Automatically fix violations where possible")
+	cmd.Flags().Bool("fail-fast", false, "Stop on first violation")
+	cmd.Flags().Bool("summary-only", false, "Show summary only")
 
 	return cmd
 }

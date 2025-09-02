@@ -104,7 +104,7 @@ Theme files are JSON documents stored in `~/.config/gomdlint/themes/`. Here's th
     "processing": "🔄",
     "file_found": "📄",
     "file_saved": "💾",
-    "benchmark": "⚡",
+    "performance": "⚡",
     "results": "📊",
     "winner": "🏆",
     "search": "🔍",
@@ -223,7 +223,7 @@ You can customize any of these symbols:
 | `processing` | Operations in progress | 🔍 | ... | [...] |
 | `file_found` | File operations | 📁 | * | [FILE] |
 | `file_saved` | File saved operations | 📁 | * | [SAVED] |
-| `benchmark` | Benchmark operations | 🚀 | > | [BENCH] |
+| `performance` | Performance operations | 🚀 | > | [PERF] |
 | `performance` | Performance metrics | 📊 | # | [PERF] |
 | `winner` | Best performance | 🏆 | * | [BEST] |
 | `results` | Results display | 📈 | # | [RESULTS] |
@@ -261,7 +261,7 @@ Create a professional theme with custom symbols:
       "error": "[FAIL]",
       "warning": "[WARN]",
       "processing": "[WORK]",
-      "benchmark": "[PERF]"
+      "performance": "[PERF]"
     }
   }
 }
@@ -277,7 +277,7 @@ Keep some visual indicators while removing others:
     "theme": "default",
     "custom_symbols": {
       "processing": "...",
-      "benchmark": "[BENCHMARK]"
+      "performance": "[PERFORMANCE]"
     }
   }
 }

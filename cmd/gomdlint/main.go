@@ -22,7 +22,7 @@ func main() {
 		Short: "A high-performance Go markdown linter",
 		Long: `gomdlint is a fast, extensible markdown linter written in Go.
 It provides compatibility with markdownlint while offering superior performance
-and modern features like interactive TUI modes and comprehensive rule support.`,
+and comprehensive rule support with plugin extensibility.`,
 		Version: fmt.Sprintf("%s (commit: %s, date: %s)", version, commit, date),
 		Run: func(cmd *cobra.Command, args []string) {
 			// If no subcommand specified, show help or run default linting
@@ -53,8 +53,8 @@ and modern features like interactive TUI modes and comprehensive rule support.`,
 		commands.NewConfigCommand(),
 		commands.NewThemeCommand(),
 		commands.NewRulesCommand(),
-		commands.NewTUICommand(),
-		commands.NewBenchmarkCommand(),
+		commands.NewPluginCommand(),
+		commands.NewStyleCommand(),
 		commands.NewVersionCommand(version, commit, date),
 	)
 

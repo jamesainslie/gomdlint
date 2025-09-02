@@ -33,74 +33,87 @@ func md031Function(ctx context.Context, params entity.RuleParams) functional.Res
 	// Get configuration
 	checkListItems := getBoolConfig(params.Config, "list_items", true)
 
+	// Track code block state to avoid double-processing fences
+	inCodeBlock := false
+	fenceChar := ""
+	minFenceLength := 0
+
 	// Find all fenced code blocks
 	for i, line := range params.Lines {
 		lineNumber := i + 1
 		trimmed := strings.TrimSpace(line)
 
-		// Check for fenced code block start
+		// Check for fenced code block start/end
 		if strings.HasPrefix(trimmed, "```") || strings.HasPrefix(trimmed, "~~~") {
-			// Skip if in list items and list_items is false
-			if !checkListItems && isInListItem(params.Lines, i) {
-				continue
-			}
+			currentFenceChar := string(trimmed[0])
 
-			// Check line above
-			if i > 0 {
-				prevLine := strings.TrimSpace(params.Lines[i-1])
-				if prevLine != "" {
-					violation := value.NewViolation(
-						[]string{"MD031", "blanks-around-fences"},
-						"Fenced code blocks should be surrounded by blank lines",
-						nil,
-						lineNumber,
-					)
-
-					violation = violation.WithErrorDetail("Missing blank line before fenced code block")
-					violation = violation.WithErrorContext(strings.TrimSpace(line))
-
-					// Add fix information - insert blank line before
-					fixInfo := value.NewFixInfo().
-						WithLineNumber(lineNumber).
-						WithEditColumn(1).
-						WithDeleteLength(0).
-						WithReplaceText("\n")
-
-					violation = violation.WithFixInfo(*fixInfo)
-					violations = append(violations, *violation)
-				}
-			}
-
-			// Find the closing fence
-			fenceChar := string(trimmed[0])
-			fenceLength := 0
+			// Count fence length
+			currentFenceLength := 0
 			for _, char := range trimmed {
-				if string(char) == fenceChar {
-					fenceLength++
+				if string(char) == currentFenceChar {
+					currentFenceLength++
 				} else {
 					break
 				}
 			}
 
-			closingLineIndex := findClosingFence(params.Lines, i+1, fenceChar, fenceLength)
-			if closingLineIndex != -1 {
+			if !inCodeBlock {
+				// This is a code block start
+				// Skip if in list items and list_items is false
+				if !checkListItems && isInListItem(params.Lines, i) {
+					continue
+				}
+
+				inCodeBlock = true
+				fenceChar = currentFenceChar
+				minFenceLength = currentFenceLength
+
+				// Check line above
+				if i > 0 {
+					prevLine := strings.TrimSpace(params.Lines[i-1])
+					if prevLine != "" {
+						violation := value.NewViolation(
+							[]string{"MD031", "blanks-around-fences"},
+							"Fenced code blocks should be surrounded by blank lines",
+							nil,
+							lineNumber,
+						)
+
+						violation = violation.WithErrorDetail("Missing blank line before fenced code block")
+						violation = violation.WithErrorContext(strings.TrimSpace(line))
+
+						// Add fix information - insert blank line before
+						fixInfo := value.NewFixInfo().
+							WithLineNumber(lineNumber).
+							WithEditColumn(1).
+							WithDeleteLength(0).
+							WithReplaceText("\n")
+
+						violation = violation.WithFixInfo(*fixInfo)
+						violations = append(violations, *violation)
+					}
+				}
+			} else if currentFenceChar == fenceChar && currentFenceLength >= minFenceLength {
+				// This is a code block end
+				inCodeBlock = false
+
 				// Check line after closing fence
-				if closingLineIndex < len(params.Lines)-1 {
-					nextLine := strings.TrimSpace(params.Lines[closingLineIndex])
+				if i < len(params.Lines)-1 {
+					nextLine := strings.TrimSpace(params.Lines[i+1])
 					if nextLine != "" {
 						violation := value.NewViolation(
 							[]string{"MD031", "blanks-around-fences"},
 							"Fenced code blocks should be surrounded by blank lines",
 							nil,
-							closingLineIndex+1,
+							lineNumber,
 						)
 
 						violation = violation.WithErrorDetail("Missing blank line after fenced code block")
-						violation = violation.WithErrorContext(strings.TrimSpace(params.Lines[closingLineIndex-1]))
+						violation = violation.WithErrorContext(strings.TrimSpace(line))
 
 						// Add fix information - insert blank line after
 						fixInfo := value.NewFixInfo().
-							WithLineNumber(closingLineIndex + 2). // After the closing fence
+							WithLineNumber(lineNumber + 1). // After the closing fence
 							WithEditColumn(1).
 							WithDeleteLength(0).
 							WithReplaceText("\n")

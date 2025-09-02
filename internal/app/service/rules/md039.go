@@ -30,9 +30,9 @@ func md039Function(ctx context.Context, params entity.RuleParams) functional.Res
 	var violations []value.Violation
 
 	// Regex patterns for different link types with spaces in text
-	inlineLinkSpaceRegex := regexp.MustCompile(`\[(\s+)([^\]]*?)(\s+)\]\([^)]*\)`)     // [ text ](url)
-	referenceLinkSpaceRegex := regexp.MustCompile(`\[(\s+)([^\]]*?)(\s+)\]\[[^\]]*\]`) // [ text ][ref]
-	shortcutLinkSpaceRegex := regexp.MustCompile(`\[(\s+)([^\]]*?)(\s+)\](?!\[|\()`)   // [ text ]
+	inlineLinkSpaceRegex := regexp.MustCompile(`\[(\s*)([^\]]*?)(\s*)\]\([^)]*\)`)     // [ text ](url)
+	referenceLinkSpaceRegex := regexp.MustCompile(`\[(\s*)([^\]]*?)(\s*)\]\[[^\]]*\]`) // [ text ][ref]
+	shortcutLinkSpaceRegex := regexp.MustCompile(`\[(\s*)([^\]]*?)(\s*)\]`)            // [ text ]
 
 	// Process each line
 	for i, line := range params.Lines {
@@ -129,15 +129,25 @@ func md039Function(ctx context.Context, params entity.RuleParams) functional.Res
 			}
 		}
 
-		// Check shortcut links [text]
+		// Check shortcut links [text] - but exclude inline and reference links
 		shortcutMatches := shortcutLinkSpaceRegex.FindAllStringSubmatch(line, -1)
 		shortcutPositions := shortcutLinkSpaceRegex.FindAllStringIndex(line, -1)
 
 		for j, match := range shortcutMatches {
+			pos := shortcutPositions[j]
+
+			// Skip if this match is part of an inline or reference link
+			matchEnd := pos[1]
+			if matchEnd < len(line) {
+				nextChars := line[matchEnd:]
+				if strings.HasPrefix(nextChars, "(") || strings.HasPrefix(nextChars, "[") {
+					continue // This is an inline or reference link, not a shortcut link
+				}
+			}
+
 			leadingSpace := match[1]
 			linkText := match[2]
 			trailingSpace := match[3]
-			pos := shortcutPositions[j]
 
 			if len(leadingSpace) > 0 || len(trailingSpace) > 0 {
 				violation := value.NewViolation(

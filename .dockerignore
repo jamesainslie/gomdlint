@@ -1,0 +1,71 @@
+# Ignore files and directories that shouldn't be included in Docker build context
+
+# Version control
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+bin/
+releases/
+dist/
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+test-results.xml
+benchmark-results.txt
+
+# Documentation
+*.md
+docs/
+!README.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Dependencies (will be downloaded during build)
+vendor/
+
+# Development configuration
+.env
+.env.local
+.env.development
+.env.test
+
+# CI/CD files
+.travis.yml
+.circleci/
+azure-pipelines.yml
+
+# Docker files (except Dockerfile)
+docker-compose*.yml
+Dockerfile.*
+
+# Security scans and reports
+*.sarif
+gosec-report.json
+govulncheck-report.json
+
+# Logs
+*.log
+
+# Archives
+*.tar.gz
+*.zip
+*.tar
+*.gz

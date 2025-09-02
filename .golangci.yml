@@ -1,0 +1,359 @@
+# .golangci.yml - Comprehensive Go 1.24+ linting configuration
+# Based on modern Go development standards and best practices
+
+run:
+  timeout: 10m
+  go: '1.24'
+  tests: true
+  skip-dirs:
+    - bin
+    - vendor
+    - releases
+    - .git
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*_gen\\.go$"
+  modules-download-mode: readonly
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+  uniq-by-line: true
+  sort-results: true
+
+linters-settings:
+  # Error checking
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+    exclude-functions:
+      - fmt.Print.*
+      - fmt.Fprint.*
+
+  # Code complexity
+  gocyclo:
+    min-complexity: 15
+
+  # Cognitive complexity (more accurate than cyclomatic)
+  gocognit:
+    min-complexity: 20
+
+  # Function length
+  funlen:
+    lines: 100
+    statements: 60
+
+  # Line length
+  lll:
+    line-length: 120
+    tab-width: 4
+
+  # Duplicate code detection
+  dupl:
+    threshold: 100
+
+  # Variable naming
+  varnamelen:
+    min-name-length: 2
+    ignore-names:
+      - "id"
+      - "db"
+      - "ip"
+      - "ok"
+      - "fd"
+      - "ch"
+
+  # Go vet settings
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - fieldalignment # Can be noisy for structs with small fields
+
+  # Static analysis
+  staticcheck:
+    checks: ["all"]
+
+  # Unused code detection
+  unused:
+    check-exported: false
+
+  # Style checks
+  gofmt:
+    simplify: true
+
+  gofumpt:
+    lang-version: "1.24"
+    extra-rules: true
+
+  goimports:
+    local-prefixes: github.com/gomdlint/gomdlint
+
+  # Security checks
+  gosec:
+    severity: "low"
+    confidence: "low"
+    exclude-generated: true
+    excludes:
+      - G107 # Subprocess launched with variable - often false positive
+      - G204 # Subprocess launched with function call as argument - often false positive
+
+  # Performance checks
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false
+
+  # Interface checks
+  ireturn:
+    allow:
+      - anon
+      - error
+      - empty
+      - stdlib
+      - "github.com/gomdlint/gomdlint/internal/domain"
+
+  # Error handling
+  errorlint:
+    errorf: true
+    asserts: true
+    comparison: true
+
+  # Nil checks
+  nilnil:
+    checked-types:
+      - ptr
+      - func
+      - iface
+      - map
+      - chan
+
+  # Context checks
+  contextcheck:
+    check-non-inherited: true
+
+  # Maintainability index
+  maintidx:
+    under: 20
+
+  # Nested if statements
+  nestif:
+    min-complexity: 6
+
+  # Test-related
+  testpackage:
+    skip-regexp: "(export|internal)_test\\.go"
+
+  # Comment formatting
+  godot:
+    scope: declarations
+    exclude:
+      - "^fixme:"
+      - "^todo:"
+    capital: false
+
+  # Package naming
+  revive:
+    severity: warning
+    confidence: 0.8
+    rules:
+      - name: atomic
+      - name: line-length-limit
+        arguments: [120]
+      - name: argument-limit
+        arguments: [8]
+      - name: cyclomatic
+        arguments: [15]
+      - name: max-public-structs
+        arguments: [10]
+      - name: file-header
+        disabled: true
+      - name: empty-lines
+      - name: package-comments
+        disabled: true
+
+  # Import order and grouping
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/gomdlint/gomdlint)
+      - localmodule
+    skip-generated: true
+
+  # Struct tag validation
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake
+        yaml: snake
+        xml: camel
+        bson: snake
+        avro: snake
+        mapstructure: kebab
+
+linters:
+  disable-all: true
+  enable:
+    # Core Go analyzers
+    - errcheck      # Check for unhandled errors
+    - gosimple      # Simplify code suggestions
+    - govet         # Go vet examination
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Advanced static analysis
+    - typecheck     # Type checking
+    - unused        # Unused code detection
+
+    # Code quality and style
+    - gofmt         # Format code
+    - gofumpt       # Stricter gofmt
+    - goimports     # Fix imports
+    - gci           # Control Go import order
+    - misspell      # Fix spelling mistakes
+    - unconvert     # Remove unnecessary type conversions
+    - unparam       # Unused function parameters
+    - wastedassign  # Wasted assignment statements
+
+    # Security
+    - gosec         # Security audit
+
+    # Performance
+    - prealloc      # Preallocate slices for better performance
+
+    # Bugs and correctness
+    - bodyclose     # Check HTTP body is closed
+    - contextcheck  # Context usage
+    - errorlint     # Error handling best practices
+    - exportloopref # Loop variable capture bug
+    - gocritic      # Comprehensive Go analyzer
+    - rowserrcheck  # Check SQL row errors
+    - sqlclosecheck # SQL close check
+
+    # Complexity
+    - gocyclo       # Cyclomatic complexity
+    - gocognit      # Cognitive complexity
+    - nestif        # Nested if statements
+    - funlen        # Function length
+
+    # Style and maintainability
+    - dupl          # Duplicate code detection
+    - godot         # Comments should end with period
+    - lll           # Line length limit
+    - varnamelen    # Variable name length
+    - whitespace    # Trailing whitespace
+
+    # Test quality
+    - testpackage   # Test package naming
+    - tparallel     # Parallel test detection
+
+    # Documentation
+    - godox         # TODO/FIXME/etc comments detection
+
+    # Additional analyzers for Go 1.24+
+    - asasalint     # Pass []any as any in variadic func(...any)
+    - bidichk       # Dangerous unicode character sequences
+    - containedctx  # Struct contains context.Context
+    - decorder      # Declaration order
+    - errname       # Error naming conventions
+    - execinquery   # Query inside Exec
+    - forbidigo     # Forbid certain identifiers
+    - grouper       # Groups related declarations
+    - importas      # Enforce import aliases
+    - ireturn       # Accept interfaces, return concrete types
+    - loggercheck   # Structured logging format
+    - maintidx      # Maintainability index
+    - makezero      # Finds slice declarations with non-zero initial length
+    - nilnil        # Checks that nil is not returned with non-nil error
+    - noctx         # HTTP request without context
+    - nolintlint    # Nolint directive validation
+    - nonamedreturns # Named returns
+    - nosprintfhostport # sprintf host:port
+    - predeclared   # Predeclared identifier shadowing
+    - promlinter    # Prometheus metrics naming
+    - reassign      # Checks package-level vars reassignment
+    - revive        # Golint replacement with more rules
+    - tagliatelle   # Struct tag format validation
+    - tenv          # Detect os.Setenv usage in tests
+    - testifylint   # Testify linter
+    - thelper       # Detect test helper functions
+    - usestdlibvars # Use standard library constants
+
+issues:
+  exclude-use-default: false
+  exclude-case-sensitive: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  
+  # Exclude common false positives and less critical issues
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - funlen
+        - goconst
+        - gocognit
+        - scopelint
+        - lll
+
+    # Exclude some linters from running on main.go
+    - path: cmd/
+      linters:
+        - gocyclo
+        - funlen
+
+    # Exclude shadow checking in type switches
+    - linters:
+        - govet
+      text: "shadow: declaration of \"err\""
+
+    # Exclude line length issues in comments with URLs
+    - linters:
+        - lll
+      source: "^//.*http"
+
+    # Exclude some staticcheck messages
+    - linters:
+        - staticcheck
+      text: "SA9003:"
+
+    # Exclude some gosec rules that are often false positives
+    - linters:
+        - gosec
+      text: "G107|G204|G301|G302"
+
+    # Allow TODO and FIXME comments
+    - linters:
+        - godox
+      text: "TODO|FIXME"
+
+  # Show only new issues for existing codebases
+  new: false
+  new-from-rev: ""
+  new-from-patch: ""
+
+severity:
+  default-severity: error
+  case-sensitive: false
+  rules:
+    - linters:
+        - dupl
+        - funlen
+        - gocognit
+        - gocyclo
+        - lll
+        - maintidx
+      severity: warning
+
+    - linters:
+        - godot
+        - godox
+        - misspell
+        - varnamelen
+        - whitespace
+      severity: info

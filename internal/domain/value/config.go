@@ -53,7 +53,7 @@ func NewLintOptions() *LintOptions {
 		ResultVersion:      3,
 		CustomRules:        make([]interface{}, 0),
 		ConfigParsers:      make([]ConfigParser, 0),
-		HandleRuleFailures: false,
+		HandleRuleFailures: true,
 		Theme:              NewThemeConfig(),
 	}
 }

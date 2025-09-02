@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/gomdlint/gomdlint)](https://golang.org/)
 
-gomdlint is a fast, extensible markdown linter that provides compatibility with [markdownlint](https://github.com/DavidAnson/markdownlint) while offering superior performance through Go's concurrency model and modern features like interactive TUI modes.
+gomdlint is a fast, extensible markdown linter that provides compatibility with [markdownlint](https://github.com/DavidAnson/markdownlint) while offering superior performance through Go's concurrency model and modern features like plugin extensibility.
 
 ## Features
 
@@ -24,7 +24,7 @@ gomdlint is a fast, extensible markdown linter that provides compatibility with 
 - **Configurable**: Flexible rule configuration with JSON, YAML, and TOML support
 
 ### 🎨 Modern User Experience
-- **Interactive TUI**: Beautiful terminal interface built with Bubbletea
+- **Plugin System**: Extensible architecture for custom rules and functionality
 - **Multiple Output Formats**: Support for default, JSON, JUnit, and Checkstyle formats
 - **Auto-fixing**: Automatically fix violations where possible
 - **Rich Error Context**: Detailed violation information with fix suggestions
@@ -75,14 +75,12 @@ gomdlint lint --config .markdownlint.json *.md
 # Auto-fix violations
 gomdlint fix README.md
 
-# Interactive TUI mode
-gomdlint tui docs/
-
 # Check files (CI-friendly, exits with code 1 if violations found)
 gomdlint check docs/
 
-# Performance benchmark against markdownlint
-gomdlint benchmark --generate-test-files
+# Manage plugins and styles
+gomdlint plugin list
+gomdlint style apply relaxed
 ```
 
 ### Library Usage
@@ -190,55 +188,58 @@ gomdlint rules info MD013
 gomdlint rules list --tag headings
 ```
 
-## Interactive TUI
+## Plugin System
 
-Launch the beautiful terminal interface:
+Extend gomdlint with custom rules and functionality:
 
 ```bash
-gomdlint tui
+# List available plugins
+gomdlint plugin list
+
+# Install a plugin
+gomdlint plugin install my-custom-rules.so
+
+# Build plugin from source
+gomdlint plugin build ./my-plugin-source/
+
+# Check plugin health
+gomdlint plugin health
 ```
 
 Features:
-- 📁 **File Browser**: Navigate and select files to lint
-- 🔍 **Violation Explorer**: Browse violations with detailed information
-- 🛠️ **Interactive Fixing**: Apply fixes with confirmation
-- ⚡ **Real-time Updates**: Re-lint files as you make changes
-- 🎨 **Syntax Highlighting**: Beautiful, colorized output
+- 🔌 **Extensible Rules**: Add custom linting rules via plugins
+- 🛠️ **Go Native**: Write plugins in Go for maximum performance  
+- 🔄 **Hot Loading**: Install and manage plugins dynamically
+- 🏥 **Health Monitoring**: Built-in plugin health checks
+- 📦 **Source Building**: Build plugins directly from source
 
-### TUI Controls
-- `↑/↓` or `j/k`: Navigate
-- `Enter`: Select/view item
-- `r`: Re-run linting
-- `f`: Apply auto-fixes
-- `h` or `?`: Help
-- `q` or `Ctrl+C`: Quit
+## Style Management
+
+Use predefined configurations for different scenarios:
+
+```bash
+# List available styles
+gomdlint style list
+
+# Apply a style configuration
+gomdlint style apply strict
+
+# Show style details
+gomdlint style show relaxed
+
+# Create custom style
+gomdlint style create my-style config.json
+```
+
+Available styles:
+- **relaxed**: Lenient rules for casual documentation (120 char lines, allows HTML)
+- **strict**: Professional documentation standards (80 char lines, strict formatting)
+- **minimal**: Essential rules only (headings, basic formatting)
+- **all**: All rules enabled with default settings
 
 ## Performance
 
-gomdlint is designed for speed and includes comprehensive benchmarking:
-
-### Built-in Benchmarking
-```bash
-# Compare performance against markdownlint
-gomdlint benchmark --generate-test-files --iterations 5
-
-# Benchmark your own files
-gomdlint benchmark docs/*.md
-
-# Export results for tracking
-gomdlint benchmark --output benchmark-results.json
-```
-
-### Typical Performance
-```bash
-# Real-world performance comparison
-# gomdlint: ~50ms for 100 files
-# markdownlint: ~500ms for 100 files
-
-# Memory usage comparison  
-# gomdlint: ~15MB RAM
-# markdownlint: ~120MB RAM
-```
+gomdlint is designed for speed with native Go performance:
 
 ### Optimization Features
 - **Parallel Processing**: Process multiple files concurrently
@@ -265,7 +266,7 @@ make help              # Show available targets
 make build             # Build the binary
 make test              # Run tests
 make test-cover        # Run tests with coverage
-make benchmark         # Run performance benchmarks
+make performance       # Run performance tests
 make lint              # Run linters
 make security          # Run security checks
 make check             # Run all quality checks
@@ -285,7 +286,7 @@ gomdlint follows clean architecture principles with functional programming patte
 │   │   ├── entity/            # Core business entities (Rule)
 │   │   └── value/             # Value objects (Token, Violation, Config)
 │   ├── infrastructure/        # External integrations
-│   ├── interfaces/cli/        # CLI commands and TUI
+│   ├── interfaces/cli/        # CLI commands and interface
 │   └── shared/functional/     # Functional programming utilities
 ```
 
@@ -318,9 +319,9 @@ gomdlint lint docs/*.md
 alias markdownlint="gomdlint lint"
 ```
 
-## Benchmarks
+## Performance Comparison
 
-Performance comparison on a typical documentation repository (100 markdown files, ~500KB total):
+Performance on a typical documentation repository (100 markdown files, ~500KB total):
 
 | Tool | Time | Memory | CPU Usage |
 |------|------|--------|-----------|
@@ -328,7 +329,7 @@ Performance comparison on a typical documentation repository (100 markdown files
 | markdownlint | 523ms | 127MB | 45% |
 | markdownlint-cli2 | 401ms | 95MB | 38% |
 
-*Benchmarks run on MacBook Pro M2, Go 1.24, Node.js 20.x*
+*Results from MacBook Pro M2, Go 1.24, Node.js 20.x*
 
 ## License
 
@@ -338,7 +339,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - [markdownlint](https://github.com/DavidAnson/markdownlint) by David Anson - Original inspiration and rule definitions
 - [CommonMark](https://commonmark.org/) - Markdown specification
-- [Bubbletea](https://github.com/charmbracelet/bubbletea) - Excellent TUI framework
+- [Cobra](https://github.com/spf13/cobra) - Excellent CLI framework
 - Go community - For the amazing ecosystem and tools
 
 ## Versioning

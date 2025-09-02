@@ -32,7 +32,7 @@ func md045Function(ctx context.Context, params entity.RuleParams) functional.Res
 	// Regex patterns for different image formats
 	markdownImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\([^)]+\)`)   // ![alt](url)
 	referenceImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\[[^\]]*\]`) // ![alt][ref]
-	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\](?!\[|\()`)   // ![alt]
+	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\]`)            // ![alt]
 
 	// HTML image regex with various patterns
 	htmlImageRegex := regexp.MustCompile(`<img[^>]*>`)
@@ -101,8 +101,18 @@ func md045Function(ctx context.Context, params entity.RuleParams) functional.Res
 		shortcutPositions := shortcutImageRegex.FindAllStringIndex(line, -1)
 
 		for j, match := range shortcutMatches {
-			altText := strings.TrimSpace(match[1])
 			pos := shortcutPositions[j]
+
+			// Skip if this match is part of a markdown or reference image
+			matchEnd := pos[1]
+			if matchEnd < len(line) {
+				nextChars := line[matchEnd:]
+				if strings.HasPrefix(nextChars, "(") || strings.HasPrefix(nextChars, "[") {
+					continue // This is a markdown or reference image, not a shortcut image
+				}
+			}
+
+			altText := strings.TrimSpace(match[1])
 
 			if altText == "" {
 				violation := value.NewViolation(

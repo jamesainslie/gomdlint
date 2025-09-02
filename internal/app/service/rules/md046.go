@@ -92,6 +92,12 @@ func md046Function(ctx context.Context, params entity.RuleParams) functional.Res
 					violation = violation.WithErrorDetail(detail)
 					violation = violation.WithErrorContext(strings.TrimSpace(line))
 
+					// Add fix information - convert fenced to indented
+					fixInfo := createFencedToIndentedFix(params.Lines, i)
+					if fixInfo != nil {
+						violation = violation.WithFixInfo(*fixInfo)
+					}
+
 					violations = append(violations, *violation)
 				}
 			} else {
@@ -123,6 +129,12 @@ func md046Function(ctx context.Context, params entity.RuleParams) functional.Res
 
 					violation = violation.WithErrorDetail(detail)
 					violation = violation.WithErrorContext(strings.TrimSpace(line))
+
+					// Add fix information - convert indented to fenced
+					fixInfo := createIndentedToFencedFix(params.Lines, i)
+					if fixInfo != nil {
+						violation = violation.WithFixInfo(*fixInfo)
+					}
 
 					violations = append(violations, *violation)
 				}
@@ -197,4 +209,120 @@ func isIndentedInList(lines []string, lineIndex int) bool {
 	}
 
 	return false
+}
+
+// createFencedToIndentedFix creates fix information to convert fenced code block to indented
+func createFencedToIndentedFix(lines []string, fenceLineIndex int) *value.FixInfo {
+	// Find the complete fenced code block
+	startFence := fenceLineIndex
+	endFence := -1
+
+	// Find the closing fence
+	fenceMarker := ""
+	if strings.HasPrefix(strings.TrimSpace(lines[startFence]), "```") {
+		fenceMarker = "```"
+	} else if strings.HasPrefix(strings.TrimSpace(lines[startFence]), "~~~") {
+		fenceMarker = "~~~"
+	} else {
+		return nil // Not a fenced block
+	}
+
+	for i := startFence + 1; i < len(lines); i++ {
+		if strings.HasPrefix(strings.TrimSpace(lines[i]), fenceMarker) {
+			endFence = i
+			break
+		}
+	}
+
+	if endFence == -1 {
+		return nil // No closing fence found
+	}
+
+	// Build the replacement indented code block
+	var newLines []string
+
+	// Add content lines with 4-space indentation
+	for i := startFence + 1; i < endFence; i++ {
+		contentLine := lines[i]
+		// Add 4 spaces to the beginning of each line
+		indentedLine := "    " + contentLine
+		newLines = append(newLines, indentedLine)
+	}
+
+	replacement := strings.Join(newLines, "\n")
+
+	// Replace the entire fenced block (including fences)
+	return value.NewFixInfo().
+		WithLineNumber(startFence + 1).
+		WithDeleteCount(endFence - startFence + 1).
+		WithInsertText(replacement)
+}
+
+// createIndentedToFencedFix creates fix information to convert indented code block to fenced
+func createIndentedToFencedFix(lines []string, codeLineIndex int) *value.FixInfo {
+	// Find the complete indented code block
+	start := codeLineIndex
+	end := codeLineIndex
+
+	// Find start of code block (look backwards)
+	for i := codeLineIndex - 1; i >= 0; i-- {
+		line := lines[i]
+		if strings.TrimSpace(line) == "" {
+			// Blank line - continue looking
+			continue
+		} else if strings.HasPrefix(line, "    ") || strings.HasPrefix(line, "\t") {
+			// Still part of code block
+			start = i
+		} else {
+			// Found non-indented line, stop here
+			break
+		}
+	}
+
+	// Find end of code block (look forwards)
+	for i := codeLineIndex + 1; i < len(lines); i++ {
+		line := lines[i]
+		if strings.TrimSpace(line) == "" {
+			// Blank line - might be part of code block, keep looking
+			continue
+		} else if strings.HasPrefix(line, "    ") || strings.HasPrefix(line, "\t") {
+			// Still part of code block
+			end = i
+		} else {
+			// Found non-indented line, code block ends here
+			break
+		}
+	}
+
+	// Build the replacement fenced code block
+	var newLines []string
+	newLines = append(newLines, "```") // Opening fence
+
+	// Add content lines with indentation removed
+	for i := start; i <= end; i++ {
+		line := lines[i]
+		if strings.TrimSpace(line) == "" {
+			newLines = append(newLines, "") // Preserve blank lines
+		} else {
+			// Remove 4 spaces or 1 tab from beginning
+			var unindentedLine string
+			if strings.HasPrefix(line, "    ") {
+				unindentedLine = line[4:]
+			} else if strings.HasPrefix(line, "\t") {
+				unindentedLine = line[1:]
+			} else {
+				unindentedLine = line // Shouldn't happen, but handle gracefully
+			}
+			newLines = append(newLines, unindentedLine)
+		}
+	}
+
+	newLines = append(newLines, "```") // Closing fence
+	replacement := strings.Join(newLines, "\n")
+
+	// Replace the entire indented code block
+	return value.NewFixInfo().
+		WithLineNumber(start + 1).
+		WithDeleteCount(end - start + 1).
+		WithInsertText(replacement)
 }

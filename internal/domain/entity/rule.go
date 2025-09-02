@@ -147,6 +147,12 @@ func (r *Rule) Config() map[string]interface{} {
 	return config
 }
 
+// Function returns the rule function for direct execution.
+// This is primarily used for testing purposes.
+func (r *Rule) Function() RuleFunction {
+	return r.function
+}
+
 // Execute runs the rule function with the provided parameters.
 // This method handles error recovery and provides consistent result formatting.
 func (r *Rule) Execute(ctx context.Context, params RuleParams) functional.Result[[]value.Violation] {

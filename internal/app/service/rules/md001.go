@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/gomdlint/gomdlint/internal/domain/entity"
 	"github.com/gomdlint/gomdlint/internal/domain/value"
@@ -50,6 +51,14 @@ func md001Function(ctx context.Context, params entity.RuleParams) functional.Res
 			violation = violation.WithErrorDetail(fmt.Sprintf("Expected h%d, found h%d", expectedLevel, level))
 			violation = violation.WithErrorContext(heading.Text)
 
+			// Add fix information - change heading level to expected level
+			if expectedLevel <= 6 { // Only fix if result would be valid (h1-h6)
+				fixInfo := createHeadingLevelFix(heading, expectedLevel)
+				if fixInfo != nil {
+					violation = violation.WithFixInfo(*fixInfo)
+				}
+			}
+
 			violations = append(violations, *violation)
 		}
 
@@ -57,6 +66,48 @@ func md001Function(ctx context.Context, params entity.RuleParams) functional.Res
 	}
 
 	return functional.Ok(violations)
+}
+
+// createHeadingLevelFix creates fix information for heading level corrections
+func createHeadingLevelFix(heading value.Token, expectedLevel int) *value.FixInfo {
+	// Get the heading text
+	headingText := strings.TrimSpace(heading.Text)
+
+	// Handle ATX headings (# ## ### etc.)
+	if strings.HasPrefix(headingText, "#") {
+		// Find where the heading content starts
+		hashCount := 0
+		i := 0
+		for i < len(headingText) && headingText[i] == '#' {
+			hashCount++
+			i++
+		}
+
+		// Skip any spaces after the hashes
+		for i < len(headingText) && headingText[i] == ' ' {
+			i++
+		}
+
+		// Extract the heading content
+		content := ""
+		if i < len(headingText) {
+			content = headingText[i:]
+		}
+
+		// Create new heading with correct level
+		newHeading := strings.Repeat("#", expectedLevel) + " " + content
+
+		// Create fix info to replace the entire line
+		return value.NewFixInfo().
+			WithLineNumber(heading.StartLine()).
+			WithEditColumn(1).
+			WithDeleteLength(len(headingText)).
+			WithReplaceText(newHeading)
+	}
+
+	// Handle Setext headings (underlined with = or -)
+	// This is more complex and less common, so skip for now
+	return nil
 }
 
 // filterHeadings returns only heading tokens from the token list

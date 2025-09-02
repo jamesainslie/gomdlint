@@ -29,25 +29,7 @@ func md047Function(ctx context.Context, params entity.RuleParams) functional.Res
 	var violations []value.Violation
 
 	if len(params.Lines) == 0 {
-		// Empty file - should end with newline
-		violation := value.NewViolation(
-			[]string{"MD047", "single-trailing-newline"},
-			"Files should end with a single newline character",
-			nil,
-			1,
-		)
-
-		violation = violation.WithErrorDetail("File is empty, should end with a newline")
-
-		// Add fix information - add newline to empty file
-		fixInfo := value.NewFixInfo().
-			WithLineNumber(1).
-			WithDeleteCount(0).
-			WithInsertText("\n")
-
-		violation = violation.WithFixInfo(*fixInfo)
-		violations = append(violations, *violation)
-
+		// Empty file is valid - no violation needed
 		return functional.Ok(violations)
 	}
 
@@ -67,8 +49,11 @@ func md047Function(ctx context.Context, params entity.RuleParams) functional.Res
 		// If we have multiple lines and the last line is empty,
 		// it likely means the file ended with a newline
 		fileEndsProperlyWithNewline = lastLine == ""
+	} else if lastLine == "" {
+		// Single line that is empty means the file was just "\n"
+		fileEndsProperlyWithNewline = true
 	} else {
-		// Single line file - check if it ends with newline
+		// Single line file with content - check if it ends with newline
 		fileEndsProperlyWithNewline = strings.HasSuffix(lastLine, "\n")
 	}
 

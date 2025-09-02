@@ -5,8 +5,7 @@ project_name: gomdlint
 before:
   hooks:
     - go mod tidy
-    # Temporarily skip tests for v1.0.0 release due to ongoing test refactoring
-    # - go test ./...
+    - go test ./...
 
 builds:
   - env:

@@ -179,7 +179,6 @@ linters-settings:
       - standard
       - default
       - prefix(github.com/gomdlint/gomdlint)
-      - localmodule
     skip-generated: true
 
   # Struct tag validation

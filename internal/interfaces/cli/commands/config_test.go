@@ -419,9 +419,7 @@ func runConfigTestScenario(t *testing.T, scenario configCommandScenario) {
 		err = fmt.Errorf("command %s has no RunE or Run function", cmd.Use)
 	}
 
-	// Create dummy buffers for interface compatibility
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
+	// stdout and stderr are already created above
 
 	// Verify results
 	if scenario.expectError {

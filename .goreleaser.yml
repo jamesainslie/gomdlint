@@ -1,0 +1,185 @@
+project_name: gomdlint
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - "386"
+      - amd64
+      - arm64
+    goarm:
+      - "7"
+    gomips:
+      - hardfloat
+    main: ./cmd/gomdlint
+    ldflags:
+      - -s -w 
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    binary: gomdlint
+
+archives:
+  - format: tar.gz
+    # Use zip for windows
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^style:'
+      - '^chore:'
+  groups:
+    - title: 'Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: "^.*perf[(\\w)]*:+.*$"
+      order: 2
+    - title: 'Refactoring'
+      regexp: "^.*refactor[(\\w)]*:+.*$"
+      order: 3
+    - title: 'Documentation'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 4
+    - title: 'Other'
+      order: 999
+
+release:
+  github:
+    owner: gomdlint
+    name: gomdlint
+  header: |
+    ## gomdlint {{.Tag}} Release
+    
+    A high-performance Go markdown linter with plugin extensibility.
+  
+  footer: |
+    ## Installation
+    
+    ### Binary Download
+    Download the appropriate binary for your platform from the assets below.
+    
+    ### Package Managers
+    ```bash
+    # Go install
+    go install github.com/gomdlint/gomdlint/cmd/gomdlint@{{.Tag}}
+    
+    # From source
+    git clone https://github.com/gomdlint/gomdlint.git
+    cd gomdlint
+    go build ./cmd/gomdlint
+    ```
+    
+    ### Verification
+    ```bash
+    gomdlint version
+    gomdlint --help
+    ```
+    
+    ## What's Next
+    
+    - Check out the [plugin development guide](https://github.com/gomdlint/gomdlint/wiki/Plugin-Development)
+    - Explore [style configurations](https://github.com/gomdlint/gomdlint/wiki/Style-Management) 
+    - Join our [community discussions](https://github.com/gomdlint/gomdlint/discussions)
+
+  extra_files:
+    - glob: configs/examples/*.json
+    - glob: docs/*.md
+
+nfpms:
+  - file_name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386  
+      {{- else }}{{ .Arch }}{{ end }}
+    homepage: https://github.com/gomdlint/gomdlint
+    description: A high-performance Go markdown linter with plugin extensibility
+    maintainer: gomdlint team <team@gomdlint.dev>
+    license: MIT
+    vendor: gomdlint
+    formats:
+      - deb
+      - rpm
+      - apk
+    dependencies:
+      - git
+    recommends:
+      - make
+
+brews:
+  - name: gomdlint
+    repository:
+      owner: gomdlint
+      name: homebrew-tap
+    homepage: https://github.com/gomdlint/gomdlint
+    description: A high-performance Go markdown linter with plugin extensibility
+    license: MIT
+    test: |
+      system "#{bin}/gomdlint version"
+      system "#{bin}/gomdlint --help"
+    install: |
+      bin.install "gomdlint"
+
+scoops:
+  - name: gomdlint
+    repository:
+      owner: gomdlint
+      name: scoop-bucket
+    homepage: https://github.com/gomdlint/gomdlint
+    description: A high-performance Go markdown linter with plugin extensibility
+    license: MIT
+
+dockers:
+  - image_templates:
+      - "gomdlint/gomdlint:latest"
+      - "gomdlint/gomdlint:{{ .Tag }}"
+      - "gomdlint/gomdlint:v{{ .Major }}"
+      - "gomdlint/gomdlint:v{{ .Major }}.{{ .Minor }}"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
+
+announce:
+  skip: true  # We'll announce manually

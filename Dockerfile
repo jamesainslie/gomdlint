@@ -1,15 +1,16 @@
 # Multi-stage Dockerfile for gomdlint
-# Based on Go 1.24+ best practices for efficient, secure builds
+# Based on Go 1.21+ with proxy and Zscaler SSL support
 
 # Build stage
 FROM golang:1.21-alpine AS builder
 
-# Install build dependencies
+# Install build dependencies including certificate tools
 RUN apk add --no-cache \
     git \
     ca-certificates \
     tzdata \
     curl \
+    openssl \
     && update-ca-certificates
 
 # Create non-root user for build
@@ -21,9 +22,63 @@ ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
 ARG SERVICE=gomdlint
 
-# Set Go environment for public build
+# Handle proxy configuration for Zscaler/corporate environments
+# Use host.docker.internal for Docker Desktop or host.containers.internal for Podman
+# For Colima, we need to use the host IP from the container perspective
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+ENV NO_PROXY=${NO_PROXY}
+
+# Copy custom certificates if available (for Zscaler/corporate environments)
+COPY certs/*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No custom certificates found"
+COPY certs/*.pem /usr/local/share/ca-certificates/ 2>/dev/null || echo "No custom certificates found"
+
+# Handle Zscaler certificate installation specifically
+COPY certs/zscaler*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No Zscaler certificates found"
+COPY certs/ZscalerRootCertificate*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No Zscaler root certificates found"
+
+# Update certificate store
+RUN update-ca-certificates
+
+# Debug: List installed certificates for troubleshooting
+RUN ls -la /usr/local/share/ca-certificates/ || echo "No custom certificates installed"
+
+# Set Go environment with proxy fallback
 ENV GOPROXY=https://proxy.golang.org,direct
 ENV GOSUMDB=sum.golang.org
+ENV GOPRIVATE=""
+
+# Handle Colima networking - 127.0.0.1 proxies need host IP resolution
+RUN if [ -n "$HTTP_PROXY" ] && echo "$HTTP_PROXY" | grep -q "127.0.0.1"; then \
+        echo "Detected 127.0.0.1 proxy, resolving host IP for Colima networking..."; \
+        # Try multiple methods to find the host IP from inside Colima container \
+        HOST_IP=$(getent hosts host.docker.internal | awk '{ print $1 }' 2>/dev/null || \
+                  getent hosts gateway.docker.internal | awk '{ print $1 }' 2>/dev/null || \
+                  ip route show default | awk '/default/ { print $3 }' 2>/dev/null || \
+                  cat /proc/net/route | grep '^00000000' | awk '{print $2}' | \
+                  while read hex_ip; do printf "%d.%d.%d.%d\n" 0x${hex_ip:6:2} 0x${hex_ip:4:2} 0x${hex_ip:2:2} 0x${hex_ip:0:2}; done | head -1 || \
+                  echo "192.168.5.2"); \
+        echo "Resolved Colima host IP: $HOST_IP"; \
+        NEW_HTTP_PROXY=$(echo "$HTTP_PROXY" | sed "s/127.0.0.1/$HOST_IP/g"); \
+        NEW_HTTPS_PROXY=$(echo "$HTTPS_PROXY" | sed "s/127.0.0.1/$HOST_IP/g"); \
+        echo "Original HTTP_PROXY: $HTTP_PROXY"; \
+        echo "Updated HTTP_PROXY: $NEW_HTTP_PROXY"; \
+        export HTTP_PROXY="$NEW_HTTP_PROXY"; \
+        export HTTPS_PROXY="$NEW_HTTPS_PROXY"; \
+        # Test proxy connectivity \
+        curl -s --connect-timeout 10 "$HTTP_PROXY" || echo "Proxy connectivity test failed, continuing..."; \
+    else \
+        echo "No 127.0.0.1 proxy detected or HTTP_PROXY not set"; \
+    fi
+
+# Test SSL connectivity with Zscaler/proxy setup
+RUN echo "Testing SSL connectivity through proxy..." && \
+    (curl -s --connect-timeout 10 https://proxy.golang.org || \
+     echo "Direct HTTPS failed, will rely on proxy settings") && \
+    echo "SSL connectivity test completed"
 
 # Set working directory
 WORKDIR /build

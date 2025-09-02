@@ -1,23 +1,24 @@
-# GEICO Corporate Certificates
+# Corporate Certificates
 
-This directory contains GEICO corporate CA certificates required for secure communication within the GEICO network environment.
+This directory contains corporate CA certificates required for secure communication in corporate network environments with SSL interception.
 
 ## Certificate Files
 
-Place the following GEICO corporate certificates in this directory:
+Place the following corporate certificates in this directory as needed:
 
-- `geico-ca.crt` - Primary GEICO Certificate Authority
-- `geico-intermediate-ca.crt` - Intermediate Certificate Authority (if used)
-- `zscaler-ca.crt` - Zscaler proxy certificates (if applicable)
+- `corporate-ca.crt` - Primary Corporate Certificate Authority
+- `intermediate-ca.crt` - Intermediate Certificate Authority (if used)
+- `zscaler-ca.crt` - Zscaler proxy certificates (for Zscaler environments)
+- `ZscalerRootCertificate-*.crt` - Zscaler root certificates
 
 ## Installation
 
 ### Automatic Installation
 
-Run the GEICO environment setup script:
+Run the environment setup script:
 
 ```bash
-./scripts/geico-env-setup.sh
+./scripts/env-setup.sh
 ```
 
 This script will automatically detect your operating system and install the certificates to the appropriate trust store.

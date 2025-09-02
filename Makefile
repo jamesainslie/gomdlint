@@ -380,6 +380,14 @@ run-lint: build ## Build and run basic linting
 	@echo "$(BLUE)Running $(APP_NAME) lint...$(RESET)"
 	$(BUILD_DIR)/$(APP_NAME) lint --help
 
+setup-colima-proxy: ## Setup Colima with proxy support for Zscaler environments
+	@echo "$(BLUE)Setting up Colima with proxy support...$(RESET)"
+	./scripts/setup-colima-proxy.sh
+
+docker-build-colima: ## Build Docker image with Colima/Zscaler proxy support
+	@echo "$(BLUE)Building Docker image for Colima with proxy support...$(RESET)"
+	./scripts/docker-build-colima.sh
+
 dev: ## Run development server with hot-reload
 	@echo "$(BLUE)Starting development server with hot-reload...$(RESET)"
 	@if ! command -v air >/dev/null 2>&1; then \

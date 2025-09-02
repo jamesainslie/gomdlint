@@ -1,8 +1,8 @@
 # Multi-stage Dockerfile for gomdlint
-# Based on Go 1.24+ best practices and GEICO corporate security standards
+# Based on Go 1.24+ best practices for efficient, secure builds
 
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -21,16 +21,9 @@ ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
 ARG SERVICE=gomdlint
 
-# GEICO Corporate Environment Setup
-# Copy GEICO CA certificates (if available in build context)
-COPY certs/ /usr/local/share/ca-certificates/ 2>/dev/null || echo "No GEICO certificates found in build context"
-RUN update-ca-certificates
-
-# Set GEICO-specific Go environment
-ENV GOPROXY=https://artifactory-pd-infra.aks.aze1.cloud.geico.net/artifactory/api/go/mvp-billing-golang-all
-ENV GONOSUMDB=github.com/geico-private/*
+# Set Go environment for public build
+ENV GOPROXY=https://proxy.golang.org,direct
 ENV GOSUMDB=sum.golang.org
-ENV GEICO_ENV=container
 
 # Set working directory
 WORKDIR /build
@@ -38,10 +31,8 @@ WORKDIR /build
 # Copy go mod files first for better caching
 COPY go.mod go.sum ./
 
-# Test GEICO proxy connectivity and download dependencies
-RUN echo "Testing GEICO Go proxy connectivity..." && \
-    (curl -f --connect-timeout 10 "$GOPROXY" || echo "GEICO proxy not accessible, falling back to public proxy") && \
-    go mod download && go mod verify
+# Download dependencies
+RUN go mod download && go mod verify
 
 # Copy source code
 COPY . .
@@ -81,10 +72,10 @@ LABEL org.opencontainers.image.title="gomdlint" \
       org.opencontainers.image.revision="${COMMIT}" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.service="${SERVICE}" \
-      org.opencontainers.image.source="https://github.com/gomdlint/gomdlint" \
+      org.opencontainers.image.source="https://github.com/jamesainslie/gomdlint" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.vendor="gomdlint" \
-      maintainer="gomdlint team"
+      org.opencontainers.image.vendor="jamesainslie" \
+      maintainer="jamesainslie"
 
 # Use non-root user
 USER appuser

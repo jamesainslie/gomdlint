@@ -546,7 +546,7 @@ func TestValidateLineLength(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result := ValidateLineLength(tc.line, tc.maxLength, tc.excludeCode)
+		result := ValidateLineLength(tc.line, tc.maxLength)
 		if result != tc.expected {
 			t.Errorf("ValidateLineLength(%q, %d, %v) = %v, expected %v",
 				tc.line, tc.maxLength, tc.excludeCode, result, tc.expected)

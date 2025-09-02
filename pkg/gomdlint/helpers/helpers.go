@@ -748,3 +748,41 @@ func FindCodeBlocks(tokens []value.Token) []value.Token {
 func FindBlockquotes(tokens []value.Token) []value.Token {
 	return FilterTokensByType(tokens, value.TokenTypeBlockQuote)
 }
+
+// Math utility helpers
+
+// Min returns the smaller of two integers
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// Max returns the larger of two integers
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// Clamp constrains a value between min and max
+func Clamp(value, min, max int) int {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
+}
+
+// String utility helpers
+
+// NormalizeWhitespace normalizes multiple spaces to single spaces
+func NormalizeWhitespace(text string) string {
+	// Replace multiple spaces with single space
+	parts := strings.Fields(text)
+	return strings.Join(parts, " ")
+}

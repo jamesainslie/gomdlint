@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Future changes and modifications
 
+## [0.2.1] - 2025-01-09
+
+### Fixed
+- Created missing homebrew-tap repository for Homebrew package distribution
+- Created missing scoop-bucket repository for Scoop package distribution
+- Updated Dockerfile to remove corporate-specific configurations for public use
+- Updated Docker image namespaces to use jamesainslie account
+
+### Changed
+- Docker builds temporarily disabled due to network connectivity issues
+
 ## [0.2.0] - 2025-01-09
 
 ### Added

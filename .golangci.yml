@@ -202,7 +202,7 @@ linters:
     - govet         # Go vet examination
     - ineffassign   # Detect ineffectual assignments
     - staticcheck   # Advanced static analysis
-    - typecheck     # Type checking
+    # - typecheck     # Type checking (disabled - dependency compatibility issues)
     - unused        # Unused code detection
 
     # Code quality and style

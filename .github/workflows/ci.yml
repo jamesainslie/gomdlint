@@ -1,5 +1,5 @@
 # Comprehensive CI/CD Pipeline for gomdlint
-# Based on Go 1.24+ best practices and GEICO corporate standards
+# Based on Go 1.23+ best practices and public repository standards
 
 name: CI/CD Pipeline
 
@@ -127,7 +127,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        go-version: ['1.24']
+        go-version: ['1.23']
 
     steps:
     - name: Checkout code

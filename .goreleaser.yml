@@ -85,7 +85,7 @@ changelog:
 
 release:
   github:
-    owner: gomdlint
+    owner: jamesainslie
     name: gomdlint
   header: |
     ## gomdlint {{.Tag}} Release
@@ -101,10 +101,10 @@ release:
     ### Package Managers
     ```bash
     # Go install
-    go install github.com/gomdlint/gomdlint/cmd/gomdlint@{{.Tag}}
+    go install github.com/jamesainslie/gomdlint/cmd/gomdlint@{{.Tag}}
     
     # From source
-    git clone https://github.com/gomdlint/gomdlint.git
+    git clone https://github.com/jamesainslie/gomdlint.git
     cd gomdlint
     go build ./cmd/gomdlint
     ```
@@ -117,9 +117,9 @@ release:
     
     ## What's Next
     
-    - Check out the [plugin development guide](https://github.com/gomdlint/gomdlint/wiki/Plugin-Development)
-    - Explore [style configurations](https://github.com/gomdlint/gomdlint/wiki/Style-Management) 
-    - Join our [community discussions](https://github.com/gomdlint/gomdlint/discussions)
+    - Check out the [plugin development guide](https://github.com/jamesainslie/gomdlint/wiki/Plugin-Development)
+    - Explore [style configurations](https://github.com/jamesainslie/gomdlint/wiki/Style-Management) 
+    - Join our [community discussions](https://github.com/jamesainslie/gomdlint/discussions)
 
   extra_files:
     - glob: configs/examples/*.json
@@ -149,9 +149,9 @@ nfpms:
 brews:
   - name: gomdlint
     repository:
-      owner: gomdlint
+      owner: jamesainslie
       name: homebrew-tap
-    homepage: https://github.com/gomdlint/gomdlint
+    homepage: https://github.com/jamesainslie/gomdlint
     description: A high-performance Go markdown linter with plugin extensibility
     license: MIT
     test: |
@@ -160,9 +160,9 @@ brews:
 scoops:
   - name: gomdlint
     repository:
-      owner: gomdlint
+      owner: jamesainslie
       name: scoop-bucket
-    homepage: https://github.com/gomdlint/gomdlint
+    homepage: https://github.com/jamesainslie/gomdlint
     description: A high-performance Go markdown linter with plugin extensibility
     license: MIT
 

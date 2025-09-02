@@ -670,7 +670,7 @@ func TestStringUtilities(t *testing.T) {
 	}
 
 	// Test JoinLines
-	joined := JoinLines([]string{"a", "b", "c"}, "\n")
+	joined := JoinLines([]string{"a", "b", "c"})
 	if joined != "a\nb\nc" {
 		t.Errorf("JoinLines result %q, expected %q", joined, "a\nb\nc")
 	}

@@ -420,9 +420,7 @@ func runConfigTestScenario(t *testing.T, scenario configCommandScenario) {
 		err = fmt.Errorf("subcommand %s has no RunE or Run function", scenario.subcommand)
 	}
 
-	// Dummy variables to avoid unused variable errors
-	_ = stdout
-	_ = stderr
+	// Variables removed since they're not used in this test approach
 
 	// Verify results
 	if scenario.expectError {

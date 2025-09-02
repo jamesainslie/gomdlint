@@ -297,7 +297,7 @@ func TestParserService_EdgeCases(t *testing.T) {
 		},
 		{
 			name:       "emoji content",
-			content:    "# Title 🚀\n\nContent with emojis 😊 and symbols ⭐\n",
+			content:    "# Title \n\nContent with emojis  and symbols ⭐\n",
 			shouldWork: true,
 		},
 		{

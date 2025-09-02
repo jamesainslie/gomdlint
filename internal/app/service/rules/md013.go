@@ -50,7 +50,7 @@ func md013Function(ctx context.Context, params entity.RuleParams) functional.Res
 	stern := getBoolConfig(params.Config, "stern", false)
 
 	// Pre-compile regex for URL detection (URLs are often exempt from length limits)
-	urlRegex := regexp.MustCompile(`https?://\S+`)
+	urlRegex := regexp.MustCompile(`https?/\S+`)
 
 	// Check each line
 	for i, line := range params.Lines {

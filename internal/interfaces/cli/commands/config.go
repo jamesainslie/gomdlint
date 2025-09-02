@@ -156,7 +156,7 @@ func whichConfig(configFile string, verbose bool) error {
 
 func printSimpleWhichConfig(sources *ConfigurationSource) {
 	if sources.IsHierarchy {
-		fmt.Printf("📋 Configuration hierarchy (%d files merged):\n\n", len(sources.SourceFiles))
+		fmt.Printf(" Configuration hierarchy (%d files merged):\n\n", len(sources.SourceFiles))
 		for i, source := range sources.Sources {
 			typeIcon := getConfigTypeIcon(source.Type)
 			priority := i + 1
@@ -165,7 +165,7 @@ func printSimpleWhichConfig(sources *ConfigurationSource) {
 	} else {
 		source := sources.Sources[0]
 		typeIcon := getConfigTypeIcon(source.Type)
-		fmt.Printf("📄 Configuration: %s %s %s\n", typeIcon, source.Path, string(source.Type))
+		fmt.Printf(" Configuration: %s %s %s\n", typeIcon, source.Path, string(source.Type))
 	}
 }
 
@@ -194,13 +194,13 @@ func getConfigTypeIcon(sourceType ConfigSourceType) string {
 	case ConfigSourceTypeUser:
 		return "ℹ️"
 	case ConfigSourceTypeProject:
-		return "📁"
+		return ""
 	case ConfigSourceTypeSystem:
-		return "⚙️"
+		return ""
 	case ConfigSourceTypeCustom:
-		return "📝"
+		return ""
 	default:
-		return "📄"
+		return ""
 	}
 }
 
@@ -882,7 +882,7 @@ func displaySearchPaths(appName string) {
 			if _, err := os.Stat(configPath); err != nil {
 				exists = " (not found)"
 			} else {
-				exists = " ✓"
+				exists = " "
 			}
 			fmt.Printf("   - %s%s\n", filename, exists)
 		}

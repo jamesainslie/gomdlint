@@ -6382,7 +6382,7 @@ func TestSpecialCharactersAndUnicode(t *testing.T) {
 		"# 测试标题",                        // Chinese characters - OK
 		"## Título con acentos",         // Spanish accents - OK
 		"### Заголовок на русском",      // Russian - OK
-		"#### Title with émojis 😀",      // Emoji - OK
+		"#### Title with émojis ",      // Emoji - OK
 		"##### Title with punctuation!", // Should be flagged
 		"###### Título con puntuación.", // Should be flagged
 		"# العنوان العربي؟",             // Arabic with question mark - should be flagged
@@ -6392,7 +6392,7 @@ func TestSpecialCharactersAndUnicode(t *testing.T) {
 		createTestToken(string(value.TokenTypeATXHeading), "# 测试标题", 1, 1),
 		createTestToken(string(value.TokenTypeATXHeading), "## Título con acentos", 2, 2),
 		createTestToken(string(value.TokenTypeATXHeading), "### Заголовок на русском", 3, 3),
-		createTestToken(string(value.TokenTypeATXHeading), "#### Title with émojis 😀", 4, 4),
+		createTestToken(string(value.TokenTypeATXHeading), "#### Title with émojis ", 4, 4),
 		createTestToken(string(value.TokenTypeATXHeading), "##### Title with punctuation!", 5, 5),
 		createTestToken(string(value.TokenTypeATXHeading), "###### Título con puntuación.", 6, 6),
 		createTestToken(string(value.TokenTypeATXHeading), "# العنوان العربي؟", 7, 7),

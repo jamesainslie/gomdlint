@@ -11,25 +11,25 @@ gomdlint is a fast, extensible markdown linter that provides compatibility with 
 
 ## Features
 
-### 🚀 Performance First
+###  Performance First
 - **Blazing Fast**: Up to 10x faster than Node.js alternatives through Go's efficient concurrency
 - **Memory Efficient**: Optimized memory usage with intelligent caching
 - **Concurrent Processing**: Parallel file processing for large document sets
 - **Smart Caching**: Built-in result caching to avoid redundant processing
 
-### 🎯 Complete Rule Coverage
+###  Complete Rule Coverage
 - **59 Built-in Rules**: Full implementation of all markdownlint rules (MD001-MD059)
 - **CommonMark Compliant**: Supports CommonMark specification and GitHub Flavored Markdown (GFM)
 - **Extensible**: Plugin architecture for custom rules
 - **Configurable**: Flexible rule configuration with JSON, YAML, and TOML support
 
-### 🎨 Modern User Experience
+###  Modern User Experience
 - **Plugin System**: Extensible architecture for custom rules and functionality
 - **Multiple Output Formats**: Support for default, JSON, JUnit, and Checkstyle formats
 - **Auto-fixing**: Automatically fix violations where possible
 - **Rich Error Context**: Detailed violation information with fix suggestions
 
-### 🔧 Developer Friendly
+###  Developer Friendly
 - **Library Mode**: Use as a Go library in your applications  
 - **CLI Integration**: Perfect for CI/CD pipelines and pre-commit hooks
 - **Configuration Management**: Advanced configuration with inheritance and environment-specific settings
@@ -207,11 +207,11 @@ gomdlint plugin health
 ```
 
 Features:
-- 🔌 **Extensible Rules**: Add custom linting rules via plugins
-- 🛠️ **Go Native**: Write plugins in Go for maximum performance  
-- 🔄 **Hot Loading**: Install and manage plugins dynamically
-- 🏥 **Health Monitoring**: Built-in plugin health checks
-- 📦 **Source Building**: Build plugins directly from source
+-  **Extensible Rules**: Add custom linting rules via plugins
+-  **Go Native**: Write plugins in Go for maximum performance  
+-  **Hot Loading**: Install and manage plugins dynamically
+-  **Health Monitoring**: Built-in plugin health checks
+-  **Source Building**: Build plugins directly from source
 
 ## Style Management
 
@@ -354,10 +354,10 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release history.
 
 ## Support
 
-- 📖 [Documentation](https://github.com/gomdlint/gomdlint/wiki)
-- 🐛 [Issue Tracker](https://github.com/gomdlint/gomdlint/issues)  
-- 💬 [Discussions](https://github.com/gomdlint/gomdlint/discussions)
-- 📧 [Email Support](mailto:support@gomdlint.dev)
+-  [Documentation](https://github.com/gomdlint/gomdlint/wiki)
+-  [Issue Tracker](https://github.com/gomdlint/gomdlint/issues)  
+-  [Discussions](https://github.com/gomdlint/gomdlint/discussions)
+-  [Email Support](mailto:support@gomdlint.dev)
 
 ---
 

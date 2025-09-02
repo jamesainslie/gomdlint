@@ -101,14 +101,14 @@ Theme files are JSON documents stored in `~/.config/gomdlint/themes/`. Here's th
     "error": "❌", 
     "warning": "⚠️",
     "info": "ℹ️",
-    "processing": "🔄",
-    "file_found": "📄",
-    "file_saved": "💾",
-    "performance": "⚡",
-    "results": "📊",
-    "winner": "🏆",
-    "search": "🔍",
-    "launch": "🚀"
+    "processing": "",
+    "file_found": "",
+    "file_saved": "",
+    "performance": "",
+    "results": "",
+    "winner": "",
+    "search": "",
+    "launch": ""
   },
   "settings": {
     "use_colors": true
@@ -157,8 +157,8 @@ For more control, use the object format:
     "theme": "default",
     "suppress_emojis": false,
     "custom_symbols": {
-      "success": "✨",
-      "error": "💥"
+      "success": "",
+      "error": ""
     }
   }
 }
@@ -201,10 +201,10 @@ Override specific symbols while keeping the base theme:
   "theme": {
     "theme": "minimal",
     "custom_symbols": {
-      "success": "✓",
-      "error": "✗",
+      "success": "",
+      "error": "",
       "processing": "⏳",
-      "file_found": "📄"
+      "file_found": ""
     }
   }
 }
@@ -216,19 +216,19 @@ You can customize any of these symbols:
 
 | Symbol | Purpose | Default (emoji) | Minimal | ASCII |
 |--------|---------|-----------------|---------|-------|
-| `success` | Successful operations | ✅ | ✓ | [OK] |
-| `error` | Error conditions | ❌ | ✗ | [ERROR] |
+| `success` | Successful operations | ✅ |  | [OK] |
+| `error` | Error conditions | ❌ |  | [ERROR] |
 | `warning` | Warning messages | ⚠️ | ! | [WARN] |
 | `info` | Informational messages | ℹ️ | i | [INFO] |
-| `processing` | Operations in progress | 🔍 | ... | [...] |
-| `file_found` | File operations | 📁 | * | [FILE] |
-| `file_saved` | File saved operations | 📁 | * | [SAVED] |
-| `performance` | Performance operations | 🚀 | > | [PERF] |
-| `performance` | Performance metrics | 📊 | # | [PERF] |
-| `winner` | Best performance | 🏆 | * | [BEST] |
-| `results` | Results display | 📈 | # | [RESULTS] |
-| `search` | Search operations | 🔍 | ? | [SEARCH] |
-| `launch` | Starting operations | 🚀 | > | [START] |
+| `processing` | Operations in progress |  | ... | [...] |
+| `file_found` | File operations |  | * | [FILE] |
+| `file_saved` | File saved operations |  | * | [SAVED] |
+| `performance` | Performance operations |  | > | [PERF] |
+| `performance` | Performance metrics |  | # | [PERF] |
+| `winner` | Best performance |  | * | [BEST] |
+| `results` | Results display |  | # | [RESULTS] |
+| `search` | Search operations |  | ? | [SEARCH] |
+| `launch` | Starting operations |  | > | [START] |
 | `bullet` | List bullets | • | • | * |
 | `arrow` | Directional indicators | → | -> | => |
 | `separator` | Text separators | │ | \| | \| |

@@ -57,7 +57,7 @@ func md053Function(ctx context.Context, params entity.RuleParams) functional.Res
 	// Regex patterns for different reference types
 	referenceLinkRegex := regexp.MustCompile(`\[([^\]]*)\]\[([^\]]*)\]`)   // [text][label]
 	referenceImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\[([^\]]*)\]`) // ![alt][label]
-	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\(|:)`)     // [label] (not followed by [ ( or :)
+	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\(|`)     // [label] (not followed by [ ( or 
 	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\](?!\[|\()`)     // ![label] (not followed by [ or ()
 
 	for _, line := range params.Lines {

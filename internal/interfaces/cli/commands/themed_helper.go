@@ -152,7 +152,7 @@ func (h *ThemedCommandHelper) Question() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "?"
 	}
-	return "❓"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Settings() string {
@@ -162,7 +162,7 @@ func (h *ThemedCommandHelper) Settings() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[CFG]"
 	}
-	return "⚙️"
+	return ""
 }
 
 func (h *ThemedCommandHelper) List() string {
@@ -172,7 +172,7 @@ func (h *ThemedCommandHelper) List() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[LIST]"
 	}
-	return "📋"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Document() string {
@@ -182,7 +182,7 @@ func (h *ThemedCommandHelper) Document() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[DOC]"
 	}
-	return "📄"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Edit() string {
@@ -192,7 +192,7 @@ func (h *ThemedCommandHelper) Edit() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[EDIT]"
 	}
-	return "✏️"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Location() string {
@@ -202,7 +202,7 @@ func (h *ThemedCommandHelper) Location() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[PATH]"
 	}
-	return "📍"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Tip() string {
@@ -212,7 +212,7 @@ func (h *ThemedCommandHelper) Tip() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[TIP]"
 	}
-	return "💡"
+	return ""
 }
 
 func (h *ThemedCommandHelper) Theme() string {
@@ -222,5 +222,5 @@ func (h *ThemedCommandHelper) Theme() string {
 	if h.theme.IsEmojiSuppressed() {
 		return "[THEME]"
 	}
-	return "🎨"
+	return ""
 }

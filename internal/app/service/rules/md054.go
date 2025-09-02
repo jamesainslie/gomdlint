@@ -43,14 +43,14 @@ func md054Function(ctx context.Context, params entity.RuleParams) functional.Res
 	allowShortcut := getBoolConfig(params.Config, "shortcut", true)
 
 	// Regex patterns for different link/image styles
-	autolinkRegex := regexp.MustCompile(`<(https?://[^>\s]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>`)
+	autolinkRegex := regexp.MustCompile(`<(https?/[^>\s]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>`)
 	inlineLinkRegex := regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
 	inlineImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
 	fullReferenceLinkRegex := regexp.MustCompile(`\[([^\]]*)\]\[([^\]]+)\]`)
 	fullReferenceImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\[([^\]]+)\]`)
 	collapsedReferenceLinkRegex := regexp.MustCompile(`\[([^\]]+)\]\[\s*\]`)
 	collapsedReferenceImageRegex := regexp.MustCompile(`!\[([^\]]+)\]\[\s*\]`)
-	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\(|:)`)
+	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\(|`)
 	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\](?!\[|\()`)
 
 	// Process each line

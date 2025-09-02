@@ -162,15 +162,15 @@ Example outputs:
 
 **Default Output - Hierarchical Configuration:**
 ```
-📋 Configuration hierarchy (2 files merged):
+ Configuration hierarchy (2 files merged):
 
-├─ 👤 ~/.config/gomdlint/config.json user [1]
-└─ 📁 /project/.markdownlint.json project [2]
+├─  ~/.config/gomdlint/config.json user [1]
+└─  /project/.markdownlint.json project [2]
 ```
 
 **Default Output - Single Configuration:**
 ```
-📄 Configuration: ~/.config/gomdlint/config.json user
+ Configuration: ~/.config/gomdlint/config.json user
 ```
 
 **Default Output - No Configuration:**
@@ -205,11 +205,11 @@ Search order:
    - config.json (not found)
    - config.yaml (not found)
    - .gomdlint.json (not found)
-   - .markdownlint.json ✓
+   - .markdownlint.json 
    [... additional filenames ...]
 
 2. /home/user/.config/gomdlint (XDG user config)
-   - config.json ✓
+   - config.json 
    - config.yaml (not found)
    [... additional filenames ...]
 
@@ -369,8 +369,8 @@ This uses only built-in defaults, ignoring any configuration files.
     "theme": "minimal",
     "suppress_emojis": false,
     "custom_symbols": {
-      "success": "✓",
-      "error": "✗"
+      "success": "",
+      "error": ""
     }
   }
 }

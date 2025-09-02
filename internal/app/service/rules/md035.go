@@ -39,7 +39,7 @@ func md035Function(ctx context.Context, params entity.RuleParams) functional.Res
 	var firstHRLine int
 
 	// Regex for horizontal rules
-	hrRegex := regexp.MustCompile(`^(\s*)((?:(?:\*\s*){3,})|(?:(?:-\s*){3,})|(?:(?:_\s*){3,}))\s*$`)
+	hrRegex := regexp.MustCompile(`^(\s*)((??:\*\s*){3,})|(??:-\s*){3,})|(??:_\s*){3,}))\s*$`)
 
 	// Process each line
 	for i, line := range params.Lines {

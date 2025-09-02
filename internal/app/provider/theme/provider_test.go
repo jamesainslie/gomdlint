@@ -120,8 +120,8 @@ func TestBuiltinProvider_CreateTheme(t *testing.T) {
 		config := value.ThemeConfig{
 			ThemeName: "minimal",
 			CustomSymbols: map[string]string{
-				"success": "✓",
-				"error":   "✗",
+				"success": "",
+				"error":   "",
 			},
 		}
 
@@ -140,8 +140,8 @@ func TestBuiltinProvider_ValidateConfig(t *testing.T) {
 		config := value.ThemeConfig{
 			ThemeName: "default",
 			CustomSymbols: map[string]string{
-				"success": "✓",
-				"error":   "✗",
+				"success": "",
+				"error":   "",
 			},
 		}
 
@@ -458,7 +458,7 @@ func TestManager_GetCacheKey(t *testing.T) {
 			ThemeName:      "default",
 			SuppressEmojis: false,
 			CustomSymbols: map[string]string{
-				"success": "✓",
+				"success": "",
 			},
 		}
 
@@ -520,14 +520,14 @@ func TestManager_CreateThemeFromDefinition(t *testing.T) {
 				"error":      "❌",
 				"warning":    "⚠️",
 				"info":       "ℹ️",
-				"processing": "🔄",
-				"file_found": "📄",
-				"file_saved": "💾",
+				"processing": "",
+				"file_found": "",
+				"file_saved": "",
 				"benchmark":  "⏱️",
-				"results":    "📊",
-				"winner":     "🏆",
-				"search":     "🔍",
-				"launch":     "🚀",
+				"results":    "",
+				"winner":     "",
+				"search":     "",
+				"launch":     "",
 			},
 		}
 
@@ -547,8 +547,8 @@ func TestManager_CreateThemeFromDefinition(t *testing.T) {
 		definition := utils.ThemeDefinition{
 			Name: "base-definition",
 			Symbols: map[string]string{
-				"success": "✓",
-				"error":   "✗",
+				"success": "",
+				"error":   "",
 			},
 		}
 
@@ -714,8 +714,8 @@ func TestManager_CacheKeyGeneration(t *testing.T) {
 			ThemeName:      "test-theme",
 			SuppressEmojis: true,
 			CustomSymbols: map[string]string{
-				"success": "✓",
-				"error":   "✗",
+				"success": "",
+				"error":   "",
 				"warning": "!",
 			},
 		}

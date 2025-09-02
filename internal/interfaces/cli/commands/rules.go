@@ -92,9 +92,9 @@ func listRules() error {
 		}
 
 		enabled := ruleEngine.IsRuleEnabled(primaryName)
-		status := "✓"
+		status := ""
 		if !enabled {
-			status = "✗"
+			status = ""
 		}
 
 		fmt.Printf("  %s %s%s\n", status, primaryName, aliases)

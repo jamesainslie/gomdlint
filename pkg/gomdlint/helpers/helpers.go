@@ -98,7 +98,7 @@ var (
 	FrontMatterRe = regexp.MustCompile(`^---\s*\n(.*?\n)?---\s*\n`)
 	HTMLEntityRe  = regexp.MustCompile(`&(?:#\d+|#[xX][\da-fA-F]+|[a-zA-Z]{2,31});`)
 	EmojiRe       = regexp.MustCompile(`:[\w+-]+:`)
-	URLRe         = regexp.MustCompile(`https?://[^\s<>"{}|\\^` + "`" + `\[\]]+`)
+	URLRe         = regexp.MustCompile(`https?/[^\s<>"{}|\\^` + "`" + `\[\]]+`)
 	EmailRe       = regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 )
 

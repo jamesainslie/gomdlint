@@ -111,7 +111,7 @@ func (ps *ParserService) compilePatterns() {
 		ps.tableCellRe = regexp.MustCompile(`\|([^|]*)\|`)
 
 		// GFM autolinks: https://example.com
-		ps.autolinkRe = regexp.MustCompile(`https?://[^\s<>]+`)
+		ps.autolinkRe = regexp.MustCompile(`https?/[^\s<>]+`)
 
 		// GFM strikethrough: ~~text~~
 		ps.strikethroughRe = regexp.MustCompile(`~~([^~]+)~~`)

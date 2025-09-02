@@ -52,7 +52,7 @@ func md052Function(ctx context.Context, params entity.RuleParams) functional.Res
 	referenceImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\[([^\]]*)\]`) // ![alt][label]
 
 	// Shortcut reference syntax (if not allowed, we'll check these too)
-	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\]`)   // [label] (we'll check manually if not followed by [ ( or :)
+	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\]`)   // [label] (we'll check manually if not followed by [ ( or 
 	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\]`) // ![label] (we'll check manually if not followed by [ or ()
 
 	for i, line := range params.Lines {

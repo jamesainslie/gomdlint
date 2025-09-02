@@ -30,11 +30,11 @@ func md034Function(ctx context.Context, params entity.RuleParams) functional.Res
 	var violations []value.Violation
 
 	// Regex patterns
-	urlRegex := regexp.MustCompile(`https?://[^\s<>\[\]]+`)
+	urlRegex := regexp.MustCompile(`https?/[^\s<>\[\]]+`)
 	emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 
 	// Patterns to exclude
-	angleBracketRegex := regexp.MustCompile(`<(https?://[^\s<>]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>`)
+	angleBracketRegex := regexp.MustCompile(`<(https?/[^\s<>]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>`)
 	codeSpanRegex := regexp.MustCompile("`[^`]*`")
 	shortcutLinkRegex := regexp.MustCompile(`\[[^\]]+\]`)
 	inlineLinkRegex := regexp.MustCompile(`\[[^\]]*\]\([^)]*\)`)

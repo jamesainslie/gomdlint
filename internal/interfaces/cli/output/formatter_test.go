@@ -69,8 +69,8 @@ func TestNewThemedOutput(t *testing.T) {
 		config := value.ThemeConfig{
 			ThemeName: "default",
 			CustomSymbols: map[string]string{
-				"success": "✓",
-				"error":   "✗",
+				"success": "",
+				"error":   "",
 			},
 		}
 
@@ -407,9 +407,9 @@ func TestThemedOutput_EdgeCases(t *testing.T) {
 
 	t.Run("message with special characters", func(t *testing.T) {
 		errBuffer.Reset()
-		output.Info("Special chars: éñ中文🎉")
+		output.Info("Special chars: éñ中文")
 		result := errBuffer.String()
-		assert.Contains(t, result, "Special chars: éñ中文🎉")
+		assert.Contains(t, result, "Special chars: éñ中文")
 	})
 
 	t.Run("very long message", func(t *testing.T) {

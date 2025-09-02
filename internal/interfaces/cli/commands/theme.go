@@ -538,7 +538,7 @@ func createThemeInteractive(name string, tm *utils.ThemeManager) (utils.ThemeDef
 	theme.Version = promptString("Version", "1.0.0")
 
 	// Set basic symbols
-	fmt.Println("\n📝 Configure symbols (press Enter to skip):")
+	fmt.Println("\n Configure symbols (press Enter to skip):")
 	symbolKeys := []string{"success", "error", "warning", "info", "processing"}
 
 	for _, key := range symbolKeys {

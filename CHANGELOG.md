@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Future changes and modifications
 
+## [0.2.3] - 2025-01-09
+
+### Added
+- Complete atomic commit history with proper semantic versioning
+- Enhanced release process documentation and automation
+- Comprehensive GitHub integration with automated package publishing
+
+### Changed
+- Release versioning strategy refined for semantic versioning compliance
+- Package manager integration fully tested and verified working
+
+### Fixed
+- Goreleaser configuration optimized for reliable releases
+- Package manager repository creation and formula/manifest publishing
+- Release artifact generation and distribution process
+
 ## [0.2.2] - 2025-01-09
 
 ### Added

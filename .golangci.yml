@@ -1,4 +1,4 @@
-# .golangci.yml - Comprehensive Go 1.24+ linting configuration
+# .golangci.yml - Comprehensive Go 1.23+ linting configuration
 # Based on modern Go development standards and best practices
 
 run:
@@ -84,7 +84,7 @@ linters-settings:
     simplify: true
 
   gofumpt:
-    lang-version: "1.24"
+    lang-version: "1.23"
     extra-rules: true
 
   goimports:

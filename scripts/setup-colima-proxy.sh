@@ -18,6 +18,7 @@ echo "🔍 Current proxy configuration:"
 echo "   HTTP_PROXY: ${HTTP_PROXY:-not set}"
 echo "   HTTPS_PROXY: ${HTTPS_PROXY:-not set}"
 echo "   NO_PROXY: ${NO_PROXY:-not set}"
+NO_PROXY="${NO_PROXY:-localhost,127.0.0.1,*.local}"
 
 if [[ -z "${HTTP_PROXY:-}" ]]; then
     echo "⚠️  No proxy detected. If you're behind a corporate proxy:"
@@ -43,36 +44,27 @@ fi
 # Start Colima with proxy configuration
 echo "🚀 Starting Colima with proxy configuration..."
 
-# For Colima, we need to configure the Docker daemon itself with proxy settings
-colima start \
-    --cpu 4 \
-    --memory 8 \
-    --disk 60 \
-    --docker-config '{
-        "proxies": {
-            "default": {
-                "httpProxy": "'$HTTP_PROXY'",
-                "httpsProxy": "'$HTTPS_PROXY'",
-                "noProxy": "'${NO_PROXY:-localhost,127.0.0.1,*.local}'"
-            }
-        }
-    }' || {
-        echo "❌ Colima start with proxy config failed"
-        echo "🔄 Trying alternative configuration..."
-        
-        # Alternative: Start normally and configure Docker daemon
-        colima start --cpu 4 --memory 8 --disk 60
-        
-        # Configure Docker daemon proxy through Colima SSH
-        colima ssh -- sudo mkdir -p /etc/systemd/system/docker.service.d
-        colima ssh -- "echo '[Service]
+# Start Colima normally first, then configure proxy
+colima start --cpu 4 --memory 8 --disk 60 || {
+    echo "❌ Colima start failed"
+    exit 1
+}
+
+echo "🔧 Configuring Docker daemon proxy settings..."
+
+# Configure Docker daemon proxy through Colima SSH
+colima ssh -- sudo mkdir -p /etc/systemd/system/docker.service.d
+colima ssh -- "echo '[Service]
 Environment=\"HTTP_PROXY=$HTTP_PROXY\"
 Environment=\"HTTPS_PROXY=$HTTPS_PROXY\"
 Environment=\"NO_PROXY=$NO_PROXY\"' | sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf"
-        
-        colima ssh -- sudo systemctl daemon-reload
-        colima ssh -- sudo systemctl restart docker
-    }
+
+echo "♻️  Reloading Docker daemon..."
+colima ssh -- sudo systemctl daemon-reload
+colima ssh -- sudo systemctl restart docker
+
+# Wait for Docker to restart
+sleep 5
 
 echo "✅ Colima configured with proxy settings"
 

@@ -19,14 +19,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: gomdlint/gomdlint
   
-  # GEICO-specific Go environment settings
-  GOPROXY: 'https://artifactory-pd-infra.aks.aze1.cloud.geico.net/artifactory/api/go/mvp-billing-golang-all'
-  GONOSUMDB: 'github.com/geico-private/*'
+  # Go environment settings for public repository
+  GOPROXY: 'https://proxy.golang.org,direct'
   GOSUMDB: 'sum.golang.org'
-  
-  # GEICO environment detection
-  GEICO_ENV: 'ci'
-  GTS_SERVICE_NAME: 'gomdlint'
 
 # Permissions for SARIF uploads and GitHub token usage
 permissions:
@@ -116,7 +111,7 @@ jobs:
         govulncheck -json ./... > govulncheck-report.json || true
 
     - name: Upload vulnerability scan results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: vulnerability-report
@@ -190,7 +185,7 @@ jobs:
         cat benchmark-results.txt
 
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: matrix.os == 'ubuntu-latest'
       with:
         name: benchmark-results
@@ -259,7 +254,7 @@ jobs:
         cd ..
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: binaries
         path: |
@@ -410,7 +405,7 @@ jobs:
         go list -json -deps ./... | nancy sleuth || true
 
     - name: Upload security scan artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-scans-scheduled
         path: |

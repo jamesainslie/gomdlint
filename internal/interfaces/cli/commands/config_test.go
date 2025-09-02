@@ -420,14 +420,15 @@ func runConfigTestScenario(t *testing.T, scenario configCommandScenario) {
 		err = fmt.Errorf("subcommand %s has no RunE or Run function", scenario.subcommand)
 	}
 
-	// stdout and stderr are already created above
+	// Create dummy buffers for compatibility
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
 
 	// Verify results
 	if scenario.expectError {
 		assert.Error(t, err, "Expected error but got none")
 	} else {
-		assert.NoError(t, err, "Expected no error but got: %v\nstdout: %s\nstderr: %s",
-			err, stdout.String(), stderr.String())
+		assert.NoError(t, err, "Expected no error but got: %v", err)
 	}
 
 	// Note: Output verification skipped for config commands since they use fmt.Printf

@@ -1,3 +1,5 @@
+version: 2
+
 project_name: gomdlint
 
 before:
@@ -29,8 +31,8 @@ builds:
     binary: gomdlint
 
 archives:
-  - format: tar.gz
-    # Use zip for windows
+  - id: "default"
+    format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
@@ -50,7 +52,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc
@@ -153,9 +155,6 @@ brews:
     license: MIT
     test: |
       system "#{bin}/gomdlint version"
-      system "#{bin}/gomdlint --help"
-    install: |
-      bin.install "gomdlint"
 
 scoops:
   - name: gomdlint

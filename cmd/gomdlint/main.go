@@ -55,6 +55,8 @@ and modern features like interactive TUI modes and comprehensive rule support.`,
 		commands.NewRulesCommand(),
 		commands.NewTUICommand(),
 		commands.NewBenchmarkCommand(),
+		commands.NewPluginCommand(),
+		commands.NewStyleCommand(),
 		commands.NewVersionCommand(version, commit, date),
 	)
 

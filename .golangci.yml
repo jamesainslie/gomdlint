@@ -226,7 +226,7 @@ linters:
     - contextcheck  # Context usage
     - errorlint     # Error handling best practices
     - exportloopref # Loop variable capture bug
-    - gocritic      # Comprehensive Go analyzer
+    # - gocritic      # Comprehensive Go analyzer (disabled - version compatibility issue)
     - rowserrcheck  # Check SQL row errors
     - sqlclosecheck # SQL close check
 

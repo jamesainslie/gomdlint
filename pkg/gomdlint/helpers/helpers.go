@@ -137,7 +137,7 @@ func IsATXHeading(line string) bool {
 func GetATXHeadingLevel(line string) int {
 	trimmed := strings.TrimSpace(line)
 	level := 0
-	for i, char := range trimmed {
+	for _, char := range trimmed {
 		if char == '#' && level < 6 {
 			level++
 		} else {

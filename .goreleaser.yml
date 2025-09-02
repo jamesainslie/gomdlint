@@ -166,20 +166,12 @@ scoops:
     description: A high-performance Go markdown linter with plugin extensibility
     license: MIT
 
-dockers:
-  - image_templates:
-      - "gomdlint/gomdlint:latest"
-      - "gomdlint/gomdlint:{{ .Tag }}"
-      - "gomdlint/gomdlint:v{{ .Major }}"
-      - "gomdlint/gomdlint:v{{ .Major }}.{{ .Minor }}"
-    dockerfile: Dockerfile
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--platform=linux/amd64"
+# Docker builds disabled for initial release due to network issues
+# dockers:
+#   - image_templates:
+#       - "gomdlint/gomdlint:latest"
+#       - "gomdlint/gomdlint:{{ .Tag }}"
+#     dockerfile: Dockerfile
 
 announce:
   skip: true  # We'll announce manually

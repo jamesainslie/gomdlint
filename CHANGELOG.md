@@ -13,6 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Future changes and modifications
 
+## [0.2.2] - 2025-01-09
+
+### Added
+- Comprehensive Colima and Zscaler proxy support for Docker builds
+- scripts/setup-colima-proxy.sh: Automatically configure Colima with corporate proxy settings
+- scripts/docker-build-colima.sh: Docker build script with proxy and SSL certificate handling
+- docs/docker-colima-setup.md: Complete setup guide for Colima + Zscaler environments
+- Makefile targets: setup-colima-proxy and docker-build-colima
+
+### Fixed
+- Dockerfile now properly handles HTTP_PROXY/HTTPS_PROXY build arguments
+- Automatic 127.0.0.1 to host IP resolution for Colima networking
+- Zscaler certificate installation support in Docker builds
+- Corporate certificate documentation updated for generic environments
+
+### Changed
+- certs/README.md updated for generic corporate certificate usage
+- Improved error handling in proxy setup scripts
+
+### Known Issues
+- Docker registry connections may still timeout through Zscaler SSL interception
+- Manual certificate installation may be required for some Zscaler configurations
+
 ## [0.2.1] - 2025-01-09
 
 ### Fixed

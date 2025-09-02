@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Future changes and modifications
 
-## [1.0.0] - 2025-01-09
+## [0.2.0] - 2025-01-09
 
 ### Added
 - **Plugin System**: Complete plugin architecture for custom rules and functionality

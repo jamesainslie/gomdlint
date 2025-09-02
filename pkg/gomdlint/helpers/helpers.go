@@ -786,3 +786,13 @@ func NormalizeWhitespace(text string) string {
 	parts := strings.Fields(text)
 	return strings.Join(parts, " ")
 }
+
+// SplitLines splits text into lines
+func SplitLines(text string) []string {
+	return strings.Split(text, "\n")
+}
+
+// JoinLines joins lines with newline characters
+func JoinLines(lines []string) string {
+	return strings.Join(lines, "\n")
+}

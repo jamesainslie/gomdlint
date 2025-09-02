@@ -407,16 +407,17 @@ func runConfigTestScenario(t *testing.T, scenario configCommandScenario) {
 		}
 	}
 
-	// Execute command directly via RunE (simplified output capture)
-	// Note: config commands use fmt.Printf which writes directly to os.Stdout
-	// For testing, we focus on behavior verification rather than output capture
-	if cmd.RunE != nil {
-		err = cmd.RunE(cmd, scenario.args)
-	} else if cmd.Run != nil {
-		cmd.Run(cmd, scenario.args)
+	// Execute the config subcommand (config is a parent command)
+	subCmd := findSubcommand(cmd, scenario.subcommand)
+	if subCmd == nil {
+		err = fmt.Errorf("subcommand %s not found", scenario.subcommand)
+	} else if subCmd.RunE != nil {
+		err = subCmd.RunE(subCmd, scenario.args)
+	} else if subCmd.Run != nil {
+		subCmd.Run(subCmd, scenario.args)
 		err = nil
 	} else {
-		err = fmt.Errorf("command %s has no RunE or Run function", cmd.Use)
+		err = fmt.Errorf("subcommand %s has no RunE or Run function", scenario.subcommand)
 	}
 
 	// stdout and stderr are already created above

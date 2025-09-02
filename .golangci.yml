@@ -275,7 +275,7 @@ linters:
     - revive        # Golint replacement with more rules
     - tagliatelle   # Struct tag format validation
     - tenv          # Detect os.Setenv usage in tests
-    - testifylint   # Testify linter
+   # Testify linter
     - thelper       # Detect test helper functions
     - usestdlibvars # Use standard library constants
 

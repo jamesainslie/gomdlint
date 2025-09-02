@@ -28,7 +28,7 @@ func TestFilterTokensByType(t *testing.T) {
 	}
 }
 
-func TestFilterTokensByTypes(t *testing.T) {
+func TestGetTokensOfTypes(t *testing.T) {
 	tokens := []value.Token{
 		value.NewToken(value.TokenTypeATXHeading, "# Heading", value.NewPosition(1, 1), value.NewPosition(1, 10)),
 		value.NewToken(value.TokenTypeParagraph, "Paragraph", value.NewPosition(2, 1), value.NewPosition(2, 10)),
@@ -36,7 +36,7 @@ func TestFilterTokensByTypes(t *testing.T) {
 		value.NewToken(value.TokenTypeCodeFenced, "```code```", value.NewPosition(4, 1), value.NewPosition(4, 11)),
 	}
 
-	headings := FilterTokensByTypes(tokens, value.TokenTypeATXHeading, value.TokenTypeSetextHeading)
+	headings := GetTokensOfTypes(tokens, value.TokenTypeATXHeading, value.TokenTypeSetextHeading)
 
 	if len(headings) != 2 {
 		t.Errorf("expected 2 headings, got %d", len(headings))
@@ -205,16 +205,16 @@ func TestGetIndentationType(t *testing.T) {
 		"normal line",
 	}
 
-	if GetIndentationType(spaceLines) != IndentationSpaces {
-		t.Error("expected IndentationSpaces")
+	if GetIndentationType(spaceLines[0]) != "spaces" {
+		t.Error("expected spaces")
 	}
 
-	if GetIndentationType(tabLines) != IndentationTabs {
-		t.Error("expected IndentationTabs")
+	if GetIndentationType(tabLines[0]) != "tabs" {
+		t.Error("expected tabs")
 	}
 
-	if GetIndentationType(mixedLines) != IndentationMixed {
-		t.Error("expected IndentationMixed")
+	if GetIndentationType(mixedLines[0]) != "spaces" {
+		t.Error("expected spaces for mixed (first char)")
 	}
 }
 

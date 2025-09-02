@@ -275,6 +275,23 @@ func IsUnorderedListItem(line string) bool {
 	return marker == "-" || marker == "*" || marker == "+"
 }
 
+// IsOrderedList checks if a marker represents an ordered list
+func IsOrderedList(marker string) bool {
+	if marker == "" {
+		return false
+	}
+	// Check for numbered list markers like "1.", "10.", "1)"
+	for i, char := range marker {
+		if i == len(marker)-1 {
+			return char == '.' || char == ')'
+		}
+		if char < '0' || char > '9' {
+			return false
+		}
+	}
+	return false
+}
+
 // Code block helpers
 
 // IsFencedCodeBlock checks if a line starts a fenced code block
@@ -384,6 +401,35 @@ func CountTableColumns(line string) int {
 		return count - 1
 	}
 	return count + 1
+}
+
+// GetTableCells extracts cell content from a table row
+func GetTableCells(line string) []string {
+	trimmed := strings.TrimSpace(line)
+	if !strings.Contains(trimmed, "|") {
+		return []string{}
+	}
+
+	// Split by pipe and clean up cells
+	parts := strings.Split(trimmed, "|")
+	var cells []string
+
+	for i, part := range parts {
+		// Skip empty cells at beginning/end for |col1|col2| format
+		if i == 0 && strings.TrimSpace(part) == "" {
+			continue
+		}
+		if i == len(parts)-1 && strings.TrimSpace(part) == "" {
+			continue
+		}
+		
+		cell := strings.TrimSpace(part)
+		if cell != "" {
+			cells = append(cells, cell)
+		}
+	}
+
+	return cells
 }
 
 // Emphasis helpers

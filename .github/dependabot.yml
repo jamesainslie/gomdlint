@@ -1,0 +1,69 @@
+# Dependabot configuration for automated dependency updates
+# Keeps dependencies secure and up-to-date
+
+version: 2
+
+updates:
+  # Go modules
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@gomdlint/maintainers"
+    assignees:
+      - "@gomdlint/maintainers"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "go"
+    ignore:
+      # Ignore patch updates for these packages (only allow minor/major)
+      - dependency-name: "golang.org/x/*"
+        update-types: ["version-update:semver-patch"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday" 
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@gomdlint/maintainers"
+    assignees:
+      - "@gomdlint/maintainers"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "@gomdlint/maintainers"
+    assignees:
+      - "@gomdlint/maintainers"
+    commit-message:
+      prefix: "docker"
+      include: "scope"  
+    labels:
+      - "dependencies"
+      - "docker"

@@ -28,6 +28,10 @@ type LinterService struct {
 
 // NewLinterService creates a new linting service with the specified options.
 func NewLinterService(options *value.LintOptions) (*LinterService, error) {
+	if options == nil {
+		return nil, fmt.Errorf("linting options cannot be nil")
+	}
+
 	parser := NewParserService()
 
 	ruleEngine, err := NewRuleEngine()

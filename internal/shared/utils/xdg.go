@@ -54,11 +54,10 @@ func GetXDGPaths(appName string) *XDGPaths {
 		configDirsEnv = "/etc/xdg"
 	}
 
+	configDirsParsed := parseXDGDirs(configDirsEnv)
 	var configDirs []string
-	for _, dir := range strings.Split(configDirsEnv, ":") {
-		if dir != "" {
-			configDirs = append(configDirs, filepath.Join(dir, appName))
-		}
+	for _, dir := range configDirsParsed {
+		configDirs = append(configDirs, filepath.Join(dir, appName))
 	}
 
 	// XDG_DATA_DIRS - defaults to /usr/local/share:/usr/share
@@ -67,11 +66,10 @@ func GetXDGPaths(appName string) *XDGPaths {
 		dataDirsEnv = "/usr/local/share:/usr/share"
 	}
 
+	dataDirsParsed := parseXDGDirs(dataDirsEnv)
 	var dataDirs []string
-	for _, dir := range strings.Split(dataDirsEnv, ":") {
-		if dir != "" {
-			dataDirs = append(dataDirs, filepath.Join(dir, appName))
-		}
+	for _, dir := range dataDirsParsed {
+		dataDirs = append(dataDirs, filepath.Join(dir, appName))
 	}
 
 	return &XDGPaths{
@@ -128,7 +126,22 @@ func GetConfigFilenames() []string {
 // It returns the full path to the config file, or empty string if none found.
 //
 // Deprecated: Use FindAllConfigFiles for hierarchical configuration support.
-func FindConfigFile(appName string) (string, error) {
+func FindConfigFile(xdg *XDGPaths, filename string) string {
+	searchPaths := xdg.GetConfigSearchPaths()
+
+	for _, path := range searchPaths {
+		configPath := filepath.Join(path, filename)
+		if info, err := os.Stat(configPath); err == nil && !info.IsDir() {
+			return configPath
+		}
+	}
+
+	return ""
+}
+
+// FindConfigFileByAppName searches for a configuration file using app name and returns the first found.
+// It returns the full path to the config file, or empty string if none found.
+func FindConfigFileByAppName(appName string) (string, error) {
 	xdg := GetXDGPaths(appName)
 	searchPaths := xdg.GetConfigSearchPaths()
 	filenames := GetConfigFilenames()
@@ -379,4 +392,70 @@ func IsLegacyConfigFile(configPath string) bool {
 	}
 
 	return false
+}
+
+// GetAppConfigDir returns the first existing config directory from XDG paths.
+// Returns empty string if no directory exists.
+func GetAppConfigDir(xdg *XDGPaths) string {
+	// Check user config directory first
+	if xdg.ConfigHome != "" {
+		if info, err := os.Stat(xdg.ConfigHome); err == nil && info.IsDir() {
+			return xdg.ConfigHome
+		}
+	}
+
+	// Check system config directories
+	for _, dir := range xdg.ConfigDirs {
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+
+	return ""
+}
+
+// GetAppDataDir returns the first existing data directory from XDG paths.
+// Returns empty string if no directory exists.
+func GetAppDataDir(xdg *XDGPaths) string {
+	// Check user data directory first
+	if xdg.DataHome != "" {
+		if info, err := os.Stat(xdg.DataHome); err == nil && info.IsDir() {
+			return xdg.DataHome
+		}
+	}
+
+	// Check system data directories
+	for _, dir := range xdg.DataDirs {
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+
+	return ""
+}
+
+// GetAppCacheDir returns the cache directory from XDG paths.
+// Returns empty string if the directory doesn't exist.
+func GetAppCacheDir(xdg *XDGPaths) string {
+	if xdg.CacheHome != "" {
+		if info, err := os.Stat(xdg.CacheHome); err == nil && info.IsDir() {
+			return xdg.CacheHome
+		}
+	}
+	return ""
+}
+
+// parseXDGDirs parses a colon-separated list of directories, filtering out empty entries.
+func parseXDGDirs(dirs string) []string {
+	if dirs == "" {
+		return []string{}
+	}
+
+	var result []string
+	for _, dir := range strings.Split(dirs, ":") {
+		if dir != "" {
+			result = append(result, dir)
+		}
+	}
+	return result
 }

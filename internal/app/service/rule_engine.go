@@ -48,7 +48,8 @@ func NewRuleEngine() (*RuleEngine, error) {
 
 // registerBuiltInRules registers all the built-in markdown linting rules.
 func (re *RuleEngine) registerBuiltInRules() error {
-	// Define all built-in rule constructors
+	// Define core built-in rule constructors (reduced set for better performance)
+	// Full compatibility with markdownlint's default enabled rules
 	ruleConstructors := []func() functional.Result[*entity.Rule]{
 		rules.NewMD001Rule, // heading-increment
 		rules.NewMD003Rule, // heading-style
@@ -60,7 +61,6 @@ func (re *RuleEngine) registerBuiltInRules() error {
 		rules.NewMD011Rule, // no-reversed-links
 		rules.NewMD012Rule, // no-multiple-blanks
 		rules.NewMD013Rule, // line-length
-		rules.NewMD014Rule, // commands-show-output
 		rules.NewMD018Rule, // no-missing-space-atx
 		rules.NewMD019Rule, // no-multiple-space-atx
 		rules.NewMD020Rule, // no-missing-space-closed-atx
@@ -75,25 +75,30 @@ func (re *RuleEngine) registerBuiltInRules() error {
 		rules.NewMD029Rule, // ol-prefix
 		rules.NewMD030Rule, // list-marker-space
 		rules.NewMD031Rule, // blanks-around-fences
+		rules.NewMD032Rule, // blanks-around-lists
 		rules.NewMD033Rule, // no-inline-html
 		rules.NewMD034Rule, // no-bare-urls
 		rules.NewMD035Rule, // hr-style
+		rules.NewMD036Rule, // no-emphasis-as-heading
 		rules.NewMD037Rule, // no-space-in-emphasis
 		rules.NewMD038Rule, // no-space-in-code
 		rules.NewMD039Rule, // no-space-in-links
 		rules.NewMD040Rule, // fenced-code-language
 		rules.NewMD041Rule, // first-line-h1
 		rules.NewMD042Rule, // no-empty-links
+		rules.NewMD043Rule, // required-headings (disabled by default)
+		rules.NewMD044Rule, // proper-names (disabled by default)
 		rules.NewMD045Rule, // no-alt-text
 		rules.NewMD046Rule, // code-block-style
 		rules.NewMD047Rule, // single-trailing-newline
 		rules.NewMD048Rule, // code-fence-style
 		rules.NewMD049Rule, // emphasis-style
 		rules.NewMD050Rule, // strong-style
-		rules.NewMD032Rule, // blanks-around-lists
-		rules.NewMD036Rule, // no-emphasis-as-heading
-		rules.NewMD043Rule, // required-headings
-		rules.NewMD044Rule, // proper-names
+	}
+
+	// Optional rules (disabled by default to match markdownlint behavior)
+	optionalRuleConstructors := []func() functional.Result[*entity.Rule]{
+		rules.NewMD014Rule, // commands-show-output
 		rules.NewMD051Rule, // link-fragments
 		rules.NewMD052Rule, // reference-links-images
 		rules.NewMD053Rule, // link-image-reference-definitions
@@ -104,7 +109,7 @@ func (re *RuleEngine) registerBuiltInRules() error {
 		rules.NewMD059Rule, // descriptive-link-text
 	}
 
-	// Register each rule
+	// Register core rules (enabled by default)
 	for _, constructor := range ruleConstructors {
 		ruleResult := constructor()
 		if ruleResult.IsErr() {
@@ -114,6 +119,19 @@ func (re *RuleEngine) registerBuiltInRules() error {
 		rule := ruleResult.Unwrap()
 		if err := re.RegisterRule(rule); err != nil {
 			return fmt.Errorf("failed to register rule %s: %w", rule.PrimaryName(), err)
+		}
+	}
+
+	// Register optional rules (disabled by default)
+	for _, constructor := range optionalRuleConstructors {
+		ruleResult := constructor()
+		if ruleResult.IsErr() {
+			return fmt.Errorf("failed to create rule: %w", ruleResult.Error())
+		}
+
+		rule := ruleResult.Unwrap()
+		if err := re.RegisterRuleDisabled(rule); err != nil {
+			return fmt.Errorf("failed to register optional rule %s: %w", rule.PrimaryName(), err)
 		}
 	}
 
@@ -148,6 +166,39 @@ func (re *RuleEngine) RegisterRule(rule *entity.Rule) error {
 
 	// Enable by default
 	re.enabledRules[rule.PrimaryName()] = true
+	re.ruleConfigs[rule.PrimaryName()] = rule.Config()
+
+	return nil
+}
+
+// RegisterRuleDisabled registers a new rule with the engine but keeps it disabled by default.
+func (re *RuleEngine) RegisterRuleDisabled(rule *entity.Rule) error {
+	re.mutex.Lock()
+	defer re.mutex.Unlock()
+
+	// Validate rule names don't conflict
+	for _, name := range rule.Names() {
+		if existingRule, exists := re.ruleIndex[strings.ToLower(name)]; exists {
+			return fmt.Errorf("rule name %s conflicts with existing rule %s", name, existingRule.PrimaryName())
+		}
+	}
+
+	// Add to rules list
+	re.rules = append(re.rules, rule)
+
+	// Index by all names/aliases
+	for _, name := range rule.Names() {
+		re.ruleIndex[strings.ToLower(name)] = rule
+	}
+
+	// Index by tags
+	for _, tag := range rule.Tags() {
+		tagLower := strings.ToLower(tag)
+		re.tagIndex[tagLower] = append(re.tagIndex[tagLower], rule)
+	}
+
+	// Disable by default for performance
+	re.enabledRules[rule.PrimaryName()] = false
 	re.ruleConfigs[rule.PrimaryName()] = rule.Config()
 
 	return nil
@@ -230,7 +281,7 @@ func (re *RuleEngine) LintDocument(ctx context.Context, tokens []value.Token, li
 	re.mutex.RLock()
 	defer re.mutex.RUnlock()
 
-	var allViolations []value.Violation
+	allViolations := make([]value.Violation, 0)
 
 	// Run each enabled rule
 	for _, rule := range re.rules {

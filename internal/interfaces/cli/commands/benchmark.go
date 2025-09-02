@@ -130,6 +130,11 @@ func runBenchmark(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(files) == 0 {
+		if generateTestFiles && testFileCount <= 0 {
+			// When explicitly asked to generate 0 files, handle gracefully
+			themedOutput.Info("No files generated for benchmarking (test-file-count was %d)", testFileCount)
+			return nil
+		}
 		return fmt.Errorf("no files to benchmark")
 	}
 

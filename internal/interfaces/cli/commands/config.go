@@ -133,6 +133,214 @@ Use --verbose to see detailed information including search paths, file sizes, an
 	return cmd
 }
 
+func whichConfig(configFile string, verbose bool) error {
+	// Use the same configuration loading as other commands for consistency
+	sources, err := loadConfigurationSource(configFile)
+	if err != nil {
+		return fmt.Errorf("failed to resolve configuration: %w", err)
+	}
+
+	// Check if we're using only defaults (no config files found)
+	if sources.IsDefault {
+		return fmt.Errorf("no configuration files found")
+	}
+
+	if verbose {
+		whichConfigVerbose(sources, "gomdlint")
+	} else {
+		whichConfigSimple(sources)
+	}
+
+	return nil
+}
+
+func printSimpleWhichConfig(sources *ConfigurationSource) {
+	if sources.IsHierarchy {
+		fmt.Printf("📋 Configuration hierarchy (%d files merged):\n\n", len(sources.SourceFiles))
+		for i, source := range sources.Sources {
+			typeIcon := getConfigTypeIcon(source.Type)
+			priority := i + 1
+			fmt.Printf("├─ %s %s %s [%d]\n", typeIcon, source.Path, string(source.Type), priority)
+		}
+	} else {
+		source := sources.Sources[0]
+		typeIcon := getConfigTypeIcon(source.Type)
+		fmt.Printf("📄 Configuration: %s %s %s\n", typeIcon, source.Path, string(source.Type))
+	}
+}
+
+func printVerboseWhichConfig(sources *ConfigurationSource) {
+	// Print detailed configuration information including search paths
+	fmt.Printf("Hierarchical configuration active (%d sources merged):\n\n", len(sources.Sources))
+
+	for i, source := range sources.Sources {
+		fmt.Printf("%d. %s\n", i+1, source.Path)
+		fmt.Printf("   Type: %s\n", getConfigTypeDescription(source.Type))
+
+		// Get file info if the file exists
+		if info, err := os.Stat(source.Path); err == nil {
+			fmt.Printf("   Size: %d bytes\n", info.Size())
+			fmt.Printf("   Modified: %s\n", info.ModTime().Format("2006-01-02 15:04:05"))
+		}
+		fmt.Println()
+	}
+
+	fmt.Println("Configuration merge order: system < user < project")
+	fmt.Println("Higher priority sources override settings from lower priority sources.")
+}
+
+func getConfigTypeIcon(sourceType ConfigSourceType) string {
+	switch sourceType {
+	case ConfigSourceTypeUser:
+		return "ℹ️"
+	case ConfigSourceTypeProject:
+		return "📁"
+	case ConfigSourceTypeSystem:
+		return "⚙️"
+	case ConfigSourceTypeCustom:
+		return "📝"
+	default:
+		return "📄"
+	}
+}
+
+func getConfigTypeDescription(sourceType ConfigSourceType) string {
+	switch sourceType {
+	case ConfigSourceTypeUser:
+		return "XDG user config (personal preferences)"
+	case ConfigSourceTypeProject:
+		return "Project directory (team/project settings)"
+	case ConfigSourceTypeSystem:
+		return "XDG system config (system-wide settings)"
+	case ConfigSourceTypeCustom:
+		return "Custom configuration file"
+	default:
+		return "Unknown configuration source"
+	}
+}
+
+func resolveConfigurationHierarchy(configFile string) (*ConfigurationSource, error) {
+	if configFile != "" {
+		// Single file specified
+		config, err := loadConfig(configFile)
+		if err != nil {
+			return nil, err
+		}
+
+		return &ConfigurationSource{
+			Config:      config,
+			SourceFiles: []string{configFile},
+			Sources: []ConfigSource{{
+				Path:   configFile,
+				Type:   ConfigSourceTypeCustom,
+				Config: config,
+			}},
+			IsDefault:   false,
+			IsHierarchy: false,
+		}, nil
+	}
+
+	// Search for config files in hierarchy
+	configFiles := findConfigFiles()
+
+	if len(configFiles) == 0 {
+		// No configuration files found
+		return &ConfigurationSource{
+			Config:      make(map[string]interface{}),
+			SourceFiles: []string{},
+			Sources:     []ConfigSource{},
+			IsDefault:   true,
+			IsHierarchy: false,
+		}, nil
+	}
+
+	// Load and merge configurations
+	mergedConfig := make(map[string]interface{})
+	sources := []ConfigSource{}
+
+	for _, file := range configFiles {
+		config, err := loadConfig(file)
+		if err != nil {
+			continue // Skip invalid config files
+		}
+
+		// Merge config into the main config
+		for key, value := range config {
+			mergedConfig[key] = value
+		}
+
+		sources = append(sources, ConfigSource{
+			Path:   file,
+			Type:   determineConfigSourceType(file),
+			Config: config,
+		})
+	}
+
+	return &ConfigurationSource{
+		Config:      mergedConfig,
+		SourceFiles: configFiles,
+		Sources:     sources,
+		IsDefault:   false,
+		IsHierarchy: len(configFiles) > 1,
+	}, nil
+}
+
+func findConfigFiles() []string {
+	var configFiles []string
+
+	// Search in common locations
+	searchPaths := []string{
+		".markdownlint.json",
+		".gomdlint.json",
+		"config.json",
+	}
+
+	// Add XDG user config
+	if userConfigPath := getUserConfigPath(); userConfigPath != "" {
+		searchPaths = append(searchPaths, userConfigPath)
+	}
+
+	for _, path := range searchPaths {
+		if _, err := os.Stat(path); err == nil {
+			configFiles = append(configFiles, path)
+		}
+	}
+
+	return configFiles
+}
+
+func getUserConfigPath() string {
+	userConfigDir, err := utils.EnsureConfigDir("gomdlint")
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(userConfigDir, "config.json")
+}
+
+func determineConfigSourceType(filePath string) ConfigSourceType {
+	if strings.Contains(filePath, "/.config/") || strings.Contains(filePath, "/xdg/") {
+		return ConfigSourceTypeUser
+	}
+	if strings.Contains(filePath, "/etc/") {
+		return ConfigSourceTypeSystem
+	}
+	return ConfigSourceTypeProject
+}
+
+func loadConfig(configFile string) (map[string]interface{}, error) {
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
 func newConfigEditCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "edit [config-file]",
@@ -358,24 +566,6 @@ func showConfig(configFile string) error {
 
 	fmt.Println(string(data))
 	return nil
-}
-
-func whichConfig(configFile string, verbose bool) error {
-	const appName = "gomdlint"
-	configSource, err := loadConfigurationSource(configFile)
-	if err != nil {
-		return fmt.Errorf("failed to determine configuration source: %w", err)
-	}
-
-	if configSource.IsDefault {
-		return fmt.Errorf("no configuration files found - using built-in defaults")
-	}
-
-	if verbose {
-		return whichConfigVerbose(configSource, appName)
-	}
-
-	return whichConfigSimple(configSource)
 }
 
 // configStyles holds the styling for configuration output

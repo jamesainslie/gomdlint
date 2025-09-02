@@ -8,6 +8,11 @@ import (
 // This follows the micromark token type system for compatibility.
 type TokenType string
 
+// String returns the string representation of TokenType.
+func (t TokenType) String() string {
+	return string(t)
+}
+
 // Common token types from micromark parser
 const (
 	// Document structure
@@ -73,6 +78,12 @@ const (
 	// Text content
 	TokenTypeText       TokenType = "text"
 	TokenTypeWhitespace TokenType = "whitespace"
+
+	// Legacy aliases for backward compatibility
+	TokenTypeHeading        TokenType = "atxHeading"
+	TokenTypeBlockquote     TokenType = "blockQuote"
+	TokenTypeCodeBlock      TokenType = "codeFenced"
+	TokenTypeHorizontalRule TokenType = "thematicBreak"
 )
 
 // Position represents a position in the source document.
@@ -82,10 +93,27 @@ type Position struct {
 	Offset int // 0-based byte offset
 }
 
+// NewPosition creates a new Position with the specified line and column.
+func NewPosition(line, column int) Position {
+	return Position{
+		Line:   line,
+		Column: column,
+		Offset: 0, // Will be calculated when needed
+	}
+}
+
 // Range represents a range in the source document.
 type Range struct {
 	Start Position
 	End   Position
+}
+
+// NewRange creates a new Range with the specified start and end positions.
+func NewRange(start, end Position) *Range {
+	return &Range{
+		Start: start,
+		End:   end,
+	}
 }
 
 // Token represents a parsed markdown token with position information.

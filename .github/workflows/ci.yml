@@ -1,0 +1,426 @@
+# Comprehensive CI/CD Pipeline for gomdlint
+# Based on Go 1.24+ best practices and GEICO corporate standards
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  GO_VERSION: '1.24'
+  GOLANGCI_LINT_VERSION: v1.54.0
+  REGISTRY: ghcr.io
+  IMAGE_NAME: gomdlint/gomdlint
+  
+  # GEICO-specific Go environment settings
+  GOPROXY: 'https://artifactory-pd-infra.aks.aze1.cloud.geico.net/artifactory/api/go/mvp-billing-golang-all'
+  GONOSUMDB: 'github.com/geico-private/*'
+  GOSUMDB: 'sum.golang.org'
+  
+  # GEICO environment detection
+  GEICO_ENV: 'ci'
+  GTS_SERVICE_NAME: 'gomdlint'
+
+# Permissions for SARIF uploads and GitHub token usage
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  packages: write
+
+jobs:
+  # Job 1: Quality Gates and Static Analysis
+  quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for proper analysis
+
+    - name: Set up Go with GEICO configuration
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+        check-latest: true
+
+    - name: Setup GEICO Corporate Environment
+      run: |
+        # Setup GEICO proxy and certificate configuration
+        echo "Setting up GEICO corporate environment..."
+        
+        # Configure git for corporate environment
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
+        
+        # Verify GEICO proxy configuration
+        echo "GOPROXY: $GOPROXY"
+        echo "GONOSUMDB: $GONOSUMDB"
+        echo "GOSUMDB: $GOSUMDB"
+        
+        # Test connectivity to GEICO Go proxy
+        curl -f --connect-timeout 10 "$GOPROXY" || echo "Warning: GEICO Go proxy not accessible from CI environment"
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-geico-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-geico-go-
+
+    - name: Download dependencies
+      run: |
+        go mod download
+        go mod verify
+
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: ${{ env.GOLANGCI_LINT_VERSION }}
+        args: --timeout=10m --out-format colored-line-number,sarif:golangci-lint-report.sarif
+
+    - name: Upload golangci-lint SARIF report
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: golangci-lint-report.sarif
+        category: golangci-lint
+
+    - name: Run gosec security scanner
+      run: |
+        go install github.com/securecodewarrior/sast-scan/cmd/gosec@latest
+        gosec -fmt sarif -out gosec-report.sarif -quiet ./...
+
+    - name: Upload gosec SARIF report  
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: gosec-report.sarif
+        category: gosec
+
+    - name: Run govulncheck
+      run: |
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+        govulncheck -json ./... > govulncheck-report.json || true
+
+    - name: Upload vulnerability scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: vulnerability-report
+        path: govulncheck-report.json
+        retention-days: 30
+
+  # Job 2: Comprehensive Testing
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        go-version: ['1.24']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go-version }}
+        check-latest: true
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-${{ matrix.go-version }}-
+
+    - name: Download dependencies
+      run: |
+        go mod download
+        go mod verify
+
+    - name: Run unit tests
+      run: |
+        go test -race -coverprofile=coverage.out -covermode=atomic -v ./...
+
+    - name: Check test coverage
+      run: |
+        go tool cover -func=coverage.out
+        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+        echo "Total coverage: $COVERAGE%"
+        # Require minimum 80% coverage for CI to pass
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Coverage $COVERAGE% is below required 80%"
+          exit 1
+        fi
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        file: ./coverage.out
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Run benchmarks
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        go test -bench=. -benchmem -cpu=1,2,4 ./... > benchmark-results.txt
+        echo "Benchmark Results:"
+        cat benchmark-results.txt
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: benchmark-results
+        path: benchmark-results.txt
+        retention-days: 30
+
+  # Job 3: Fuzzing (if fuzzing tests exist)
+  fuzz:
+    name: Fuzz Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Run fuzz tests
+      run: |
+        # Check if any fuzz tests exist
+        if go list -f '{{.TestGoFiles}}' ./... | grep -q Fuzz; then
+          echo "Running fuzz tests..."
+          go test -fuzz=. -fuzztime=30s ./...
+        else
+          echo "No fuzz tests found, skipping..."
+        fi
+
+  # Job 4: Build and Package
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+    - name: Build all platforms
+      run: make build-all
+
+    - name: Create checksums
+      run: |
+        cd bin
+        sha256sum * > ../checksums.txt
+        cd ..
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: |
+          bin/
+          checksums.txt
+        retention-days: 90
+
+  # Job 5: Container Image (if Dockerfile exists)
+  container:
+    name: Build Container Image
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Job 6: Release (only on tags)
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build, container]
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+      packages: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: binaries
+
+    - name: Prepare release assets
+      run: |
+        # Create release directory
+        mkdir -p releases
+        
+        # Package binaries for different platforms
+        for binary in bin/gomdlint-*; do
+          if [ -f "$binary" ]; then
+            platform=$(basename "$binary" | sed 's/gomdlint-//' | sed 's/\.exe$//')
+            if [[ "$binary" == *.exe ]]; then
+              # Windows - create zip
+              zip -j "releases/gomdlint-$platform.zip" "$binary" README.md CHANGELOG.md
+            else
+              # Unix systems - create tar.gz
+              tar -czf "releases/gomdlint-$platform.tar.gz" -C bin "$(basename "$binary")" -C .. README.md CHANGELOG.md
+            fi
+          fi
+        done
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Generate changelog from git commits since last tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+        if [ -n "$PREVIOUS_TAG" ]; then
+          echo "## Changes since $PREVIOUS_TAG" > RELEASE_CHANGELOG.md
+          git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..HEAD >> RELEASE_CHANGELOG.md
+        else
+          echo "## Initial Release" > RELEASE_CHANGELOG.md
+          echo "First release of gomdlint" >> RELEASE_CHANGELOG.md
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          releases/*
+          checksums.txt
+        body_path: RELEASE_CHANGELOG.md
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 7: Security Monitoring
+  security-monitoring:
+    name: Security Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Run comprehensive security scan
+      run: |
+        # Install security tools
+        go install github.com/securecodewarrior/sast-scan/cmd/gosec@latest
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+        go install github.com/sonatypecommunity/nancy@latest
+
+        # Run security scans
+        echo "Running gosec..."
+        gosec -fmt json -out gosec-scheduled.json ./... || true
+
+        echo "Running govulncheck..."
+        govulncheck -json ./... > govulncheck-scheduled.json || true
+
+        echo "Checking dependencies with nancy..."
+        go list -json -deps ./... | nancy sleuth || true
+
+    - name: Upload security scan artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-scans-scheduled
+        path: |
+          gosec-scheduled.json
+          govulncheck-scheduled.json
+        retention-days: 30
+
+    - name: Notify on security issues
+      if: failure()
+      run: |
+        echo "Security scan failed or found critical issues"
+        echo "Please review the security scan results"
+        # In a real setup, you might want to send notifications here

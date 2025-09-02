@@ -58,8 +58,11 @@ func (r Result[T]) UnwrapOrElse(fn func(error) T) T {
 	return r.value
 }
 
-// Error returns the contained error or nil if successful.
+// Error returns the contained error or panics if successful.
 func (r Result[T]) Error() error {
+	if r.err == nil {
+		panic("called Error on Ok result")
+	}
 	return r.err
 }
 
@@ -95,10 +98,10 @@ func AndThen[T, U any](r Result[T], fn func(T) Result[U]) Result[U] {
 	return fn(r.value)
 }
 
-// OrElse returns this Result if it's successful, otherwise returns the alternative.
-func (r Result[T]) OrElse(alternative Result[T]) Result[T] {
+// OrElse returns this Result if it's successful, otherwise calls the function to get an alternative.
+func (r Result[T]) OrElse(fn func(error) Result[T]) Result[T] {
 	if r.err != nil {
-		return alternative
+		return fn(r.err)
 	}
 	return r
 }

@@ -47,7 +47,7 @@ func md059Function(ctx context.Context, params entity.RuleParams) functional.Res
 	// Regex patterns for Markdown links (HTML links are ignored per spec)
 	inlineLinkRegex := regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)     // [text](url)
 	referenceLinkRegex := regexp.MustCompile(`\[([^\]]+)\]\[[^\]]*\]`) // [text][ref]
-	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\()`)   // [text]
+	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\]`)            // [text]
 
 	// Process each line
 	for i, line := range params.Lines {
@@ -113,8 +113,18 @@ func md059Function(ctx context.Context, params entity.RuleParams) functional.Res
 		shortcutPositions := shortcutLinkRegex.FindAllStringIndex(line, -1)
 
 		for j, match := range shortcutMatches {
-			linkText := strings.ToLower(strings.TrimSpace(match[1]))
 			pos := shortcutPositions[j]
+
+			// Skip if this match is part of an inline or reference link
+			matchEnd := pos[1]
+			if matchEnd < len(line) {
+				nextChars := line[matchEnd:]
+				if strings.HasPrefix(nextChars, "(") || strings.HasPrefix(nextChars, "[") {
+					continue // This is an inline or reference link, not a shortcut link
+				}
+			}
+
+			linkText := strings.ToLower(strings.TrimSpace(match[1]))
 
 			if prohibitedSet[linkText] {
 				violation := value.NewViolation(

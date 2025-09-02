@@ -52,8 +52,8 @@ func md052Function(ctx context.Context, params entity.RuleParams) functional.Res
 	referenceImageRegex := regexp.MustCompile(`!\[([^\]]*)\]\[([^\]]*)\]`) // ![alt][label]
 
 	// Shortcut reference syntax (if not allowed, we'll check these too)
-	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\](?!\[|\(|:)`) // [label] (not followed by [ ( or :)
-	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\](?!\[|\()`) // ![label] (not followed by [ or ()
+	shortcutLinkRegex := regexp.MustCompile(`\[([^\]]+)\]`)   // [label] (we'll check manually if not followed by [ ( or :)
+	shortcutImageRegex := regexp.MustCompile(`!\[([^\]]+)\]`) // ![label] (we'll check manually if not followed by [ or ()
 
 	for i, line := range params.Lines {
 		lineNumber := i + 1
@@ -131,8 +131,34 @@ func md052Function(ctx context.Context, params entity.RuleParams) functional.Res
 			shortcutPositions := shortcutLinkRegex.FindAllStringIndex(line, -1)
 
 			for j, match := range shortcutMatches {
-				label := strings.ToLower(strings.TrimSpace(match[1]))
 				pos := shortcutPositions[j]
+
+				// Check if this is actually a regular markdown link [text](url) or anchor link [text](#anchor)
+				if pos[1] < len(line) {
+					nextChar := line[pos[1]]
+					if nextChar == '(' {
+						// This is a regular markdown link [text](url), skip it
+						continue
+					}
+					if nextChar == '[' {
+						// This is a reference link [text][label], skip it (handled by referenceLinkRegex)
+						continue
+					}
+				}
+
+				// Check if this is part of a reference definition [label]:
+				remainingLine := line[pos[1]:]
+				if strings.HasPrefix(remainingLine, ":") {
+					// This is a reference definition, skip it
+					continue
+				}
+
+				label := strings.ToLower(strings.TrimSpace(match[1]))
+
+				// Skip anchor links (internal links starting with #)
+				if strings.HasPrefix(match[1], "#") {
+					continue
+				}
 
 				if !definedLabels[label] {
 					violation := value.NewViolation(
@@ -156,8 +182,18 @@ func md052Function(ctx context.Context, params entity.RuleParams) functional.Res
 			shortcutImgPositions := shortcutImageRegex.FindAllStringIndex(line, -1)
 
 			for j, match := range shortcutImgMatches {
-				label := strings.ToLower(strings.TrimSpace(match[1]))
 				pos := shortcutImgPositions[j]
+
+				// Check if this is actually an inline image ![alt](url) or reference image ![alt][label]
+				// by checking what follows the closing bracket
+				if pos[1] < len(line) {
+					nextChar := line[pos[1]]
+					if nextChar == '[' || nextChar == '(' {
+						continue // This is not a shortcut reference, skip it
+					}
+				}
+
+				label := strings.ToLower(strings.TrimSpace(match[1]))
 
 				if !definedLabels[label] {
 					violation := value.NewViolation(

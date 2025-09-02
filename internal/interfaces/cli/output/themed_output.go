@@ -193,13 +193,16 @@ func (to *ThemedOutput) printWithSymbol(writer io.Writer, symbol, message, color
 	// Add message
 	output.WriteString(message)
 
+	// Ensure newline if not present
+	messageHasNewline := strings.HasSuffix(message, "\n")
+	if !messageHasNewline {
+		output.WriteString("\n")
+	}
+
 	// Reset color if enabled and was applied
 	if to.enableColors && color != "" {
 		output.WriteString(to.theme.Colors().Reset)
-	}
-
-	// Ensure newline if not present
-	if !strings.HasSuffix(message, "\n") {
+		// Always add newline after reset code to ensure output ends with newline
 		output.WriteString("\n")
 	}
 

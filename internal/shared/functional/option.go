@@ -81,12 +81,12 @@ func (o Option[T]) Filter(predicate func(T) bool) Option[T] {
 	return o
 }
 
-// OrElse returns this Option if it contains a value, otherwise returns the alternative.
-func (o Option[T]) OrElse(alternative Option[T]) Option[T] {
+// OrElse returns this Option if it contains a value, otherwise calls the function to get an alternative.
+func (o Option[T]) OrElse(fn func() Option[T]) Option[T] {
 	if o.value != nil {
 		return o
 	}
-	return alternative
+	return fn()
 }
 
 // String implements the Stringer interface for better debugging.

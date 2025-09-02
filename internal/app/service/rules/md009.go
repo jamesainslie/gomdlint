@@ -62,14 +62,21 @@ func md009Function(ctx context.Context, params entity.RuleParams) functional.Res
 		// Determine if this is a valid line break (br_spaces or more trailing spaces)
 		isValidLineBreak := brSpaces > 0 && trailingSpaces >= brSpaces
 
-		// In strict mode, even valid line breaks are flagged if they're not creating actual breaks
+		// Determine if we should flag this violation
 		shouldFlag := false
-		if strict && isValidLineBreak {
-			// Check if this is actually creating a line break (not at end of paragraph)
-			shouldFlag = !isActualLineBreak(params.Lines, lineNumber)
-		} else if !isValidLineBreak {
-			// Always flag invalid trailing spaces
+		if !isValidLineBreak {
+			// Always flag invalid trailing spaces (less than br_spaces)
 			shouldFlag = true
+		} else {
+			// It's a valid line break (enough spaces), but check if it's actually creating a break
+			if !isActualLineBreak(params.Lines, lineNumber) {
+				// Not creating an actual line break, so flag it
+				shouldFlag = true
+			} else if strict {
+				// In strict mode, flag even valid line breaks
+				shouldFlag = true
+			}
+			// If it's a valid line break and not in strict mode, don't flag
 		}
 
 		if shouldFlag {

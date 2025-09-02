@@ -45,7 +45,7 @@ YELLOW = \033[33m
 BLUE = \033[34m
 RESET = \033[0m
 
-.PHONY: help build build-all test test-cover test-race fuzz benchmark clean install \
+.PHONY: help build build-all test test-cover test-race fuzz clean install \
 		lint lint-sarif gomdlint fmt goimports deps check security security-sarif govulncheck \
 		release docker docker-security tools-install pre-commit ci-local dev \
 		version-check dependency-check license-check \
@@ -226,10 +226,10 @@ fuzz: ## Run fuzz tests (if any exist)
 	fi
 	@echo "$(GREEN)Fuzz testing completed!$(RESET)"
 
-benchmark: ## Run benchmarks
-	@echo "$(BLUE)Running benchmarks...$(RESET)"
+performance: ## Run performance tests
+	@echo "$(BLUE)Running performance tests...$(RESET)"
 	go test -bench=. -benchmem -cpu=1,2,4 ./...
-	@echo "$(GREEN)Benchmarks completed!$(RESET)"
+	@echo "$(GREEN)Performance tests completed!$(RESET)"
 
 ## Quality assurance
 check: deps fmt goimports lint security govulncheck test-cover ## Run all quality checks
@@ -245,7 +245,7 @@ ci-local: ## Run CI checks locally (mimics GitHub Actions)
 	$(MAKE) govulncheck
 	$(MAKE) test-race
 	$(MAKE) test-cover
-	$(MAKE) benchmark
+	$(MAKE) performance
 	$(MAKE) build
 	@echo "$(GREEN)Local CI checks completed successfully!$(RESET)"
 
@@ -376,9 +376,9 @@ run: build ## Build and run the application
 	@echo "$(BLUE)Running $(APP_NAME)...$(RESET)"
 	$(BUILD_DIR)/$(APP_NAME) --help
 
-run-tui: build ## Build and run the TUI interface
-	@echo "$(BLUE)Running $(APP_NAME) TUI...$(RESET)"
-	$(BUILD_DIR)/$(APP_NAME) tui
+run-lint: build ## Build and run basic linting
+	@echo "$(BLUE)Running $(APP_NAME) lint...$(RESET)"
+	$(BUILD_DIR)/$(APP_NAME) lint --help
 
 dev: ## Run development server with hot-reload
 	@echo "$(BLUE)Starting development server with hot-reload...$(RESET)"
@@ -403,8 +403,8 @@ demo: build ## Run a demo of the linter
 	@echo "$(YELLOW)Linting demo.md...$(RESET)"
 	$(BUILD_DIR)/$(APP_NAME) lint demo.md || true
 	
-	@echo "$(YELLOW)Running TUI on demo.md...$(RESET)"
-	$(BUILD_DIR)/$(APP_NAME) tui demo.md || true
+	@echo "$(YELLOW)Testing plugin system...$(RESET)"
+	$(BUILD_DIR)/$(APP_NAME) plugin list || true
 	
 	@rm -f demo.md
 	@echo "$(GREEN)Demo completed!$(RESET)"

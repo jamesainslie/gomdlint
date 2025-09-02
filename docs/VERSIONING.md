@@ -54,7 +54,7 @@ Increment when adding **new features** in a backwards-compatible manner:
 - Adding new rules
 - Adding new API methods to the Go library
 - Performance improvements
-- New TUI features
+- New plugin and style features
 
 **Example**: `1.1.0` → `1.2.0`
 
@@ -67,7 +67,7 @@ Increment when making **backwards-compatible bug fixes**:
 - Security fixes
 - Performance bug fixes
 - Documentation corrections
-- TUI bug fixes
+- Plugin system bug fixes
 
 **Example**: `1.1.0` → `1.1.1`
 
@@ -79,7 +79,7 @@ All versions are tracked using annotated git tags with the `v` prefix:
 
 ```bash
 # Create a new version tag
-git tag -a v1.2.0 -m "Release v1.2.0: Add new rules and TUI improvements"
+git tag -a v1.2.0 -m "Release v1.2.0: Add new rules and plugin system"
 
 # List all version tags
 git tag -l "v*" --sort=-version:refname

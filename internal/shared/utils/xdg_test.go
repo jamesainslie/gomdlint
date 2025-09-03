@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 
 func TestGetXDGPaths_WithEnvironmentVariables(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+		t.Skip("Skipping XDG-specific tests on Windows - Windows uses AppData paths")
 	}
 	// Save original environment
 	originalEnv := map[string]string{
@@ -54,7 +55,7 @@ func TestGetXDGPaths_WithEnvironmentVariables(t *testing.T) {
 
 func TestGetXDGPaths_WithDefaults(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+		t.Skip("Skipping XDG-specific tests on Windows - Windows uses AppData paths")
 	}
 	// Save original environment
 	originalEnv := map[string]string{
@@ -96,7 +97,7 @@ func TestGetXDGPaths_WithDefaults(t *testing.T) {
 
 func TestGetXDGPaths_NoHomeDirectory(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+		t.Skip("Skipping XDG-specific tests on Windows - Windows uses AppData paths")
 	}
 	// Save original environment
 	originalHome := os.Getenv("HOME")
@@ -124,7 +125,7 @@ func TestGetXDGPaths_NoHomeDirectory(t *testing.T) {
 
 func TestGetXDGPaths_EmptyAppName(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+		t.Skip("Skipping XDG-specific tests on Windows - Windows uses AppData paths")
 	}
 	// Save original environment
 	originalEnv := map[string]string{
@@ -166,7 +167,7 @@ func TestGetXDGPaths_EmptyAppName(t *testing.T) {
 
 func TestGetXDGPaths_ComplexAppName(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+		t.Skip("Skipping XDG-specific tests on Windows - Windows uses AppData paths")
 	}
 	// Save original environment
 	originalHome := os.Getenv("HOME")
@@ -450,11 +451,33 @@ func TestParseXDGDirs_PathsWithSpaces(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+// TestGetWindowsPaths verifies Windows-specific path handling
+func TestGetWindowsPaths(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Skipping Windows-specific tests on non-Windows platforms")
+	}
+
+	paths := GetXDGPaths("testapp")
+
+	// On Windows, we expect AppData paths
+	assert.NotEmpty(t, paths.ConfigHome)
+	assert.NotEmpty(t, paths.DataHome)
+	assert.NotEmpty(t, paths.CacheHome)
+	
+	// Verify paths contain expected Windows patterns
+	assert.Contains(t, paths.ConfigHome, "AppData")
+	assert.Contains(t, paths.ConfigHome, "testapp")
+	assert.Contains(t, paths.CacheHome, "Local")
+	
+	// Config and data should be the same on Windows
+	assert.Equal(t, paths.ConfigHome, paths.DataHome)
+}
+
 // Test edge cases and error conditions
 func TestXDGPaths_EdgeCases(t *testing.T) {
 	t.Run("very_long_paths", func(t *testing.T) {
 		if runtime.GOOS == "windows" {
-			t.Skip("Skipping path length tests on Windows - different behavior expected")
+			t.Skip("Skipping XDG-specific path tests on Windows - Windows uses AppData paths")
 		}
 		longPath := strings.Repeat("a", 1000)
 

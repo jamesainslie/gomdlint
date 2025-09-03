@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -16,9 +17,65 @@ type XDGPaths struct {
 }
 
 // GetXDGPaths returns the XDG Base Directory paths for the application.
-// It follows the XDG Base Directory Specification:
+// On Windows, it uses Windows-standard directories (AppData) instead of XDG.
+// On Unix-like systems, it follows the XDG Base Directory Specification:
 // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 func GetXDGPaths(appName string) *XDGPaths {
+	if runtime.GOOS == "windows" {
+		return getWindowsPaths(appName)
+	}
+	return getXDGPaths(appName)
+}
+
+// getWindowsPaths returns Windows-standard paths instead of XDG
+func getWindowsPaths(appName string) *XDGPaths {
+	homeDir, _ := os.UserHomeDir()
+	
+	// Use APPDATA for user config and data
+	configHome := os.Getenv("APPDATA")
+	if configHome == "" && homeDir != "" {
+		configHome = filepath.Join(homeDir, "AppData", "Roaming")
+	}
+	if configHome != "" {
+		configHome = filepath.Join(configHome, appName)
+	}
+
+	// Data directory same as config on Windows
+	dataHome := configHome
+
+	// Use LOCALAPPDATA for cache
+	cacheHome := os.Getenv("LOCALAPPDATA")
+	if cacheHome == "" && homeDir != "" {
+		cacheHome = filepath.Join(homeDir, "AppData", "Local")
+	}
+	if cacheHome != "" {
+		cacheHome = filepath.Join(cacheHome, appName)
+	}
+
+	// System-wide directories using ProgramData
+	var configDirs []string
+	var dataDirs []string
+	
+	programData := os.Getenv("PROGRAMDATA")
+	if programData == "" {
+		programData = filepath.Join("C:", "ProgramData")
+	}
+	
+	systemDir := filepath.Join(programData, appName)
+	configDirs = append(configDirs, systemDir)
+	dataDirs = append(dataDirs, systemDir)
+
+	return &XDGPaths{
+		ConfigHome: configHome,
+		DataHome:   dataHome,
+		CacheHome:  cacheHome,
+		ConfigDirs: configDirs,
+		DataDirs:   dataDirs,
+	}
+}
+
+// getXDGPaths returns standard XDG paths for Unix-like systems
+func getXDGPaths(appName string) *XDGPaths {
 	homeDir, _ := os.UserHomeDir()
 
 	// XDG_CONFIG_HOME - defaults to ~/.config

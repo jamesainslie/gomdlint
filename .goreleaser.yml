@@ -149,7 +149,7 @@ brews:
   - name: gomdlint
     repository:
       owner: jamesainslie
-      name: homebrew-tap
+      name: homebrew-gomdlint
     homepage: https://github.com/jamesainslie/gomdlint
     description: A high-performance Go markdown linter with plugin extensibility
     license: MIT
@@ -160,7 +160,7 @@ scoops:
   - name: gomdlint
     repository:
       owner: jamesainslie
-      name: scoop-bucket
+      name: scoop-gomdlint
     homepage: https://github.com/jamesainslie/gomdlint
     description: A high-performance Go markdown linter with plugin extensibility
     license: MIT

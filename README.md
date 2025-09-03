@@ -42,7 +42,7 @@ gomdlint is a fast, extensible markdown linter that provides compatibility with 
 ### Homebrew (macOS/Linux)
 ```bash
 # Coming soon
-brew install gomdlint/tap/gomdlint
+brew install jamesainslie/gomdlint/gomdlint
 ```
 
 ### Go Install

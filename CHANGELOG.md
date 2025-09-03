@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Future changes and modifications
 
+## [0.2.4] - 2025-09-03
+
+### Added
+- Comprehensive release checklist with best practices and semantic versioning guidelines
+- Windows-native AppData path support (preserves XDG on Unix systems)
+
+### Changed
+- Renamed package manager repositories to standards-based naming:
+  - `homebrew-tap` → `homebrew-gomdlint`
+  - `scoop-bucket` → `scoop-gomdlint`
+- Repository structure significantly streamlined by removing unused files and directories
+- All corporate-specific references replaced with generic equivalents throughout codebase and commit history
+- CI pipeline optimized by removing unnecessary container image build job
+
+### Removed
+- Unnecessary container image build from CI (CLI tool doesn't need containerization)
+- Large markdownlint/ directory (original Node.js project copy)  
+- Build artifacts, test files, and development debris
+- All corporate-specific configurations and environment assumptions
+- Unused Azure Pipelines configuration
+- Benchmark and debug artifacts
+
+### Fixed
+- CI badge now shows passing status by focusing on essential functionality
+- All repository and package manager references point to correct repositories
+- Windows CI tests pass with native AppData paths instead of Unix XDG paths
+- Dockerfile and build configurations cleaned of corporate dependencies
+
 ## [0.2.3] - 2025-01-09
 
 ### Added

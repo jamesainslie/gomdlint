@@ -97,7 +97,7 @@ jobs:
 
     - name: Run gosec security scanner
       run: |
-        go install github.com/securecodewarrior/sast-scan/cmd/gosec@latest
+        go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
         gosec -fmt sarif -out gosec-report.sarif -quiet ./...
 
         # SARIF upload disabled - gosec not generating SARIF in current config

@@ -144,7 +144,7 @@ func runLint(cmd *cobra.Command, args []string) error {
 
 	// Handle stdin input
 	if stdin {
-		_, err := readStdin()
+		content, err := readStdin()
 		if err != nil {
 			return fmt.Errorf("failed to read from stdin: %w", err)
 		}

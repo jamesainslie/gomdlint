@@ -30,7 +30,7 @@ func GetXDGPaths(appName string) *XDGPaths {
 // getWindowsPaths returns Windows-standard paths instead of XDG
 func getWindowsPaths(appName string) *XDGPaths {
 	homeDir, _ := os.UserHomeDir()
-	
+
 	// Use APPDATA for user config and data
 	configHome := os.Getenv("APPDATA")
 	if configHome == "" && homeDir != "" {
@@ -55,12 +55,12 @@ func getWindowsPaths(appName string) *XDGPaths {
 	// System-wide directories using ProgramData
 	var configDirs []string
 	var dataDirs []string
-	
+
 	programData := os.Getenv("PROGRAMDATA")
 	if programData == "" {
 		programData = filepath.Join("C:", "ProgramData")
 	}
-	
+
 	systemDir := filepath.Join(programData, appName)
 	configDirs = append(configDirs, systemDir)
 	dataDirs = append(dataDirs, systemDir)

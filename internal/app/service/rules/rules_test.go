@@ -6385,7 +6385,7 @@ func TestSpecialCharactersAndUnicode(t *testing.T) {
 		"# 测试标题",                        // Chinese characters - OK
 		"## Título con acentos",         // Spanish accents - OK
 		"### Заголовок на русском",      // Russian - OK
-		"#### Title with émojis ",      // Emoji - OK
+		"#### Title with émojis ",       // Emoji - OK
 		"##### Title with punctuation!", // Should be flagged
 		"###### Título con puntuación.", // Should be flagged
 		"# العنوان العربي؟",             // Arabic with question mark - should be flagged

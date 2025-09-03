@@ -192,7 +192,7 @@ func TestGetXDGPaths_WindowsStyle(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Skipping XDG Windows-style test on Windows - Windows uses native AppData paths")
 	}
-	
+
 	// Save original environment
 	originalEnv := map[string]string{
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),

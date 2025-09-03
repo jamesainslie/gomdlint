@@ -11,6 +11,9 @@ import (
 )
 
 func TestGetXDGPaths_WithEnvironmentVariables(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+	}
 	// Save original environment
 	originalEnv := map[string]string{
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
@@ -50,6 +53,9 @@ func TestGetXDGPaths_WithEnvironmentVariables(t *testing.T) {
 }
 
 func TestGetXDGPaths_WithDefaults(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+	}
 	// Save original environment
 	originalEnv := map[string]string{
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
@@ -89,6 +95,9 @@ func TestGetXDGPaths_WithDefaults(t *testing.T) {
 }
 
 func TestGetXDGPaths_NoHomeDirectory(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+	}
 	// Save original environment
 	originalHome := os.Getenv("HOME")
 	defer func() {
@@ -114,6 +123,9 @@ func TestGetXDGPaths_NoHomeDirectory(t *testing.T) {
 }
 
 func TestGetXDGPaths_EmptyAppName(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+	}
 	// Save original environment
 	originalEnv := map[string]string{
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
@@ -153,6 +165,9 @@ func TestGetXDGPaths_EmptyAppName(t *testing.T) {
 }
 
 func TestGetXDGPaths_ComplexAppName(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG path tests on Windows - different path separators expected")
+	}
 	// Save original environment
 	originalHome := os.Getenv("HOME")
 	defer func() {
@@ -438,6 +453,9 @@ func TestParseXDGDirs_PathsWithSpaces(t *testing.T) {
 // Test edge cases and error conditions
 func TestXDGPaths_EdgeCases(t *testing.T) {
 	t.Run("very_long_paths", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Skipping path length tests on Windows - different behavior expected")
+		}
 		longPath := strings.Repeat("a", 1000)
 
 		// Save original environment

@@ -17,7 +17,7 @@ env:
   GO_VERSION: '1.23'
   GOLANGCI_LINT_VERSION: v1.54.0
   REGISTRY: ghcr.io
-  IMAGE_NAME: gomdlint/gomdlint
+  IMAGE_NAME: jamesainslie/gomdlint
   
   # Go environment settings for public repository
   GOPROXY: 'https://proxy.golang.org,direct'

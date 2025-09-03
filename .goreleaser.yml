@@ -131,7 +131,7 @@ nfpms:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386  
       {{- else }}{{ .Arch }}{{ end }}
-    homepage: https://github.com/gomdlint/gomdlint
+    homepage: https://github.com/jamesainslie/gomdlint
     description: A high-performance Go markdown linter with plugin extensibility
     maintainer: gomdlint team <team@gomdlint.dev>
     license: MIT

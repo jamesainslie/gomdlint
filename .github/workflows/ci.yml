@@ -165,11 +165,11 @@ jobs:
         go tool cover -func=coverage.out
         COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
         echo "Total coverage: $COVERAGE%"
-              # Require minimum 50% coverage for CI to pass
-      if (( $(echo "$COVERAGE < 50" | bc -l) )); then
-        echo "Coverage $COVERAGE% is below required 50%"
-        exit 1
-      fi
+        # Require minimum 50% coverage for CI to pass
+        if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+          echo "Coverage $COVERAGE% is below required 50%"
+          exit 1
+        fi
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

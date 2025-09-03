@@ -17,15 +17,14 @@ GOARCH ?= $(shell go env GOARCH)
 CGO_ENABLED ?= 0
 GO_VERSION ?= $(shell go version | cut -d' ' -f3 | sed 's/go//')
 
-# GEICO-specific Go proxy configuration
-export GOPROXY := https://artifactory-pd-infra.aks.aze1.cloud.geico.net/artifactory/api/go/mvp-billing-golang-all
-export GONOSUMDB := github.com/geico-private/*,github.com/alexflint/go-scalar
+# Public Go proxy configuration
+export GOPROXY := https://proxy.golang.org,direct
 export GOSUMDB := sum.golang.org
 
-# GEICO environment detection
-GEICO_ENV ?= $(shell if [ -n "$$GEICO_ENV" ]; then echo $$GEICO_ENV; elif hostname | grep -q "\.in\."; then echo "in"; elif hostname | grep -q "\.pd\."; then echo "pd"; elif hostname | grep -q "\.ut\."; then echo "ut"; else echo "local"; fi)
-GTS_SERVICE_NAME = $(APP_NAME)
-GTS_TEAM = developer-engineering
+# Build environment
+BUILD_ENV ?= $(shell if [ -n "$$CI" ]; then echo "ci"; else echo "local"; fi)
+SERVICE_NAME = $(APP_NAME)
+PROJECT_TEAM = gomdlint-dev
 
 # Quality gates
 COVERAGE_THRESHOLD = 80
@@ -313,13 +312,13 @@ version: ## Show version information
 	@echo "Go Version: $(shell go version)"
 	@echo "OS/Arch: $(GOOS)/$(GOARCH)"
 	@echo "Processors: $(NUM_PROCESSORS)"
-	@echo "GEICO Environment: $(GEICO_ENV)"
-	@echo "GTS Service Name: $(GTS_SERVICE_NAME)"
-	@echo "GTS Team: $(GTS_TEAM)"
+	@echo "Build Environment: $(BUILD_ENV)"
+	@echo "Service Name: $(SERVICE_NAME)"
+	@echo "Project Team: $(PROJECT_TEAM)"
 
 version-check: ## Check if Go version meets requirements
 	@echo "$(BLUE)Checking Go version...$(RESET)"
-	@REQUIRED_VERSION="1.24"; \
+	@REQUIRED_VERSION="1.23"; \
 	CURRENT_VERSION=$(GO_VERSION); \
 	if [ "$$CURRENT_VERSION" \< "$$REQUIRED_VERSION" ]; then \
 		echo "$(RED)Go version $$CURRENT_VERSION is below required $$REQUIRED_VERSION$(RESET)"; \
@@ -417,56 +416,52 @@ demo: build ## Run a demo of the linter
 	@rm -f demo.md
 	@echo "$(GREEN)Demo completed!$(RESET)"
 
-## GEICO-specific targets
-geico-init: ## Initialize GEICO Go project environment
-	@echo "$(BLUE)Initializing GEICO Go project environment...$(RESET)"
+## Repository-specific targets
+env-init: ## Initialize project build environment
+	@echo "$(BLUE)Initializing build environment...$(RESET)"
 	@echo "GOPROXY: $(GOPROXY)"
-	@echo "GONOSUMDB: $(GONOSUMDB)" 
 	@echo "GOSUMDB: $(GOSUMDB)"
-	@echo "GEICO Environment: $(GEICO_ENV)"
+	@echo "Build Environment: $(BUILD_ENV)"
 	go mod tidy
 	go mod verify
 	$(MAKE) security
-	@echo "$(GREEN)GEICO environment initialized!$(RESET)"
+	@echo "$(GREEN)Build environment initialized!$(RESET)"
 
-geico-build: geico-init ## Build with GEICO standards
-	@echo "$(BLUE)Building with GEICO standards...$(RESET)"
+release-build: env-init ## Build with release standards
+	@echo "$(BLUE)Building with release standards...$(RESET)"
 	@mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=$(CGO_ENABLED) go build $(LDFLAGS) \
 		-ldflags="-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DATE) \
-		-X main.geicoEnv=$(GEICO_ENV) -X main.gtsServiceName=$(GTS_SERVICE_NAME) \
-		-X main.gtsTeam=$(GTS_TEAM)" \
+		-X main.buildEnv=$(BUILD_ENV) -X main.serviceName=$(SERVICE_NAME) \
+		-X main.projectTeam=$(PROJECT_TEAM)" \
 		-o $(BUILD_DIR)/$(APP_NAME) $(CMD_DIR)
-	@echo "$(GREEN)GEICO build completed: $(BUILD_DIR)/$(APP_NAME)$(RESET)"
+	@echo "$(GREEN)Release build completed: $(BUILD_DIR)/$(APP_NAME)$(RESET)"
 
-geico-env-check: ## Check GEICO environment configuration
-	@echo "$(BLUE)Checking GEICO environment configuration...$(RESET)"
-	@echo "Environment Detection: $(GEICO_ENV)"
-	@case "$(GEICO_ENV)" in \
-		"in") echo "$(GREEN)✓ Detected GEICO IN (Development) environment$(RESET)" ;; \
-		"pd") echo "$(GREEN)✓ Detected GEICO PD (Staging) environment$(RESET)" ;; \
-		"ut") echo "$(GREEN)✓ Detected GEICO UT (Production) environment$(RESET)" ;; \
-		"local") echo "$(YELLOW)⚠ Local development environment$(RESET)" ;; \
-		*) echo "$(RED)✗ Unknown environment: $(GEICO_ENV)$(RESET)" ;; \
-	esac
-	@echo "GTS Service Name: $(GTS_SERVICE_NAME)"
-	@echo "GTS Team: $(GTS_TEAM)"
+## Repository-specific targets
 
-geico-proxy-test: ## Test GEICO Go proxy connectivity
-	@echo "$(BLUE)Testing GEICO Go proxy connectivity...$(RESET)"
+env-check: ## Check build environment configuration
+	@echo "$(BLUE)Checking build environment configuration...$(RESET)"
+	@echo "Build Environment: $(BUILD_ENV)"
+	@echo "Service Name: $(SERVICE_NAME)"
+	@echo "Project Team: $(PROJECT_TEAM)"
+	@echo "GOPROXY: $(GOPROXY)"
+	@echo "GOSUMDB: $(GOSUMDB)"
+
+proxy-test: ## Test Go proxy connectivity
+	@echo "$(BLUE)Testing Go proxy connectivity...$(RESET)"
 	@echo "Testing proxy: $(GOPROXY)"
 	@if curl -f --connect-timeout 10 "$(GOPROXY)" >/dev/null 2>&1; then \
-		echo "$(GREEN)✓ GEICO Go proxy is accessible$(RESET)"; \
+		echo "$(GREEN)✓ Go proxy is accessible$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠ GEICO Go proxy not accessible from this environment$(RESET)"; \
-		echo "$(YELLOW)This is normal for external environments$(RESET)"; \
+		echo "$(YELLOW)⚠ Go proxy not accessible$(RESET)"; \
+		echo "$(YELLOW)Check network connectivity$(RESET)"; \
 	fi
 
-geico-compliance: ## Run GEICO compliance checks
-	@echo "$(BLUE)Running GEICO compliance checks...$(RESET)"
+compliance: ## Run code compliance checks
+	@echo "$(BLUE)Running code compliance checks...$(RESET)"
 	
 	# Check for prohibited patterns
-	@echo "Checking for prohibited code patterns..."
+	@echo "Checking for code patterns..."
 	@if grep -r "TODO\|FIXME\|XXX\|HACK" . --include="*.go" >/dev/null 2>&1; then \
 		echo "$(YELLOW)⚠ Found TODO/FIXME comments - review before production$(RESET)"; \
 		grep -rn "TODO\|FIXME\|XXX\|HACK" . --include="*.go" | head -10; \
@@ -474,7 +469,7 @@ geico-compliance: ## Run GEICO compliance checks
 		echo "$(GREEN)✓ No prohibited patterns found$(RESET)"; \
 	fi
 	
-	# Check for GEICO-specific compliance
+	# Check license compliance
 	@echo "Checking license compliance..."
 	@go list -m all | grep -E "(GPL|AGPL|LGPL)" && { \
 		echo "$(RED)✗ Prohibited licenses found!$(RESET)"; \
@@ -489,7 +484,7 @@ geico-compliance: ## Run GEICO compliance checks
 		echo "$(GREEN)✓ No obvious credential leaks found$(RESET)"; \
 	fi
 	
-	@echo "$(GREEN)GEICO compliance check completed!$(RESET)"
+	@echo "$(GREEN)Code compliance check completed!$(RESET)"
 
 # Default target
 .DEFAULT_GOAL := help

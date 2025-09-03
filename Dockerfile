@@ -33,12 +33,16 @@ ENV HTTPS_PROXY=${HTTPS_PROXY}
 ENV NO_PROXY=${NO_PROXY}
 
 # Copy custom certificates if available (for Zscaler/corporate environments)
-COPY certs/*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No custom certificates found"
-COPY certs/*.pem /usr/local/share/ca-certificates/ 2>/dev/null || echo "No custom certificates found"
+# Create certificates directory first
+RUN mkdir -p /usr/local/share/ca-certificates/
 
-# Handle Zscaler certificate installation specifically
-COPY certs/zscaler*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No Zscaler certificates found"
-COPY certs/ZscalerRootCertificate*.crt /usr/local/share/ca-certificates/ 2>/dev/null || echo "No Zscaler root certificates found"
+# Copy certificate directory if it exists, otherwise create empty directory
+COPY certs /tmp/certs/
+RUN if [ -d /tmp/certs ]; then \
+    find /tmp/certs -name "*.crt" -exec cp {} /usr/local/share/ca-certificates/ \; || true; \
+    find /tmp/certs -name "*.pem" -exec cp {} /usr/local/share/ca-certificates/ \; || true; \
+    echo "Certificate installation completed"; \
+    else echo "No certificates directory found"; fi
 
 # Update certificate store
 RUN update-ca-certificates

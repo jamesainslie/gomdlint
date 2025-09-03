@@ -2,10 +2,12 @@
 
 > A high-performance, feature-rich markdown linter written in Go
 
-[![Build Status](https://github.com/gomdlint/gomdlint/workflows/CI/badge.svg)](https://github.com/gomdlint/gomdlint/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gomdlint/gomdlint)](https://goreportcard.com/report/github.com/gomdlint/gomdlint)
+[![Build Status](https://github.com/jamesainslie/gomdlint/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/jamesainslie/gomdlint/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jamesainslie/gomdlint)](https://goreportcard.com/report/github.com/jamesainslie/gomdlint)
+[![codecov](https://codecov.io/gh/jamesainslie/gomdlint/branch/main/graph/badge.svg)](https://codecov.io/gh/jamesainslie/gomdlint)
+[![Release](https://img.shields.io/github/release/jamesainslie/gomdlint.svg)](https://github.com/jamesainslie/gomdlint/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/gomdlint/gomdlint)](https://golang.org/)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/jamesainslie/gomdlint)](https://golang.org/)
 
 gomdlint is a fast, extensible markdown linter that provides compatibility with [markdownlint](https://github.com/DavidAnson/markdownlint) while offering superior performance through Go's concurrency model and modern features like plugin extensibility.
 
@@ -45,15 +47,15 @@ brew install gomdlint/tap/gomdlint
 
 ### Go Install
 ```bash
-go install github.com/gomdlint/gomdlint/cmd/gomdlint@latest
+go install github.com/jamesainslie/gomdlint/cmd/gomdlint@latest
 ```
 
 ### Pre-built Binaries
-Download the latest release from [GitHub Releases](https://github.com/gomdlint/gomdlint/releases).
+Download the latest release from [GitHub Releases](https://github.com/jamesainslie/gomdlint/releases).
 
 ### From Source
 ```bash
-git clone https://github.com/gomdlint/gomdlint.git
+git clone https://github.com/jamesainslie/gomdlint.git
 cd gomdlint
 make build
 ```
@@ -93,7 +95,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/gomdlint/gomdlint/pkg/gomdlint"
+    "github.com/jamesainslie/gomdlint/pkg/gomdlint"
 )
 
 func main() {
@@ -250,12 +252,12 @@ gomdlint is designed for speed with native Go performance:
 ## Development
 
 ### Prerequisites
-- Go 1.24+
+- Go 1.23+
 - Make (optional, but recommended)
 
 ### Setup Development Environment
 ```bash
-git clone https://github.com/gomdlint/gomdlint.git
+git clone https://github.com/jamesainslie/gomdlint.git
 cd gomdlint
 make dev-setup
 ```
@@ -329,7 +331,7 @@ Performance on a typical documentation repository (100 markdown files, ~500KB to
 | markdownlint | 523ms | 127MB | 45% |
 | markdownlint-cli2 | 401ms | 95MB | 38% |
 
-*Results from MacBook Pro M2, Go 1.24, Node.js 20.x*
+*Results from MacBook Pro M2, Go 1.23, Node.js 20.x*
 
 ## License
 
@@ -354,9 +356,9 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release history.
 
 ## Support
 
--  [Documentation](https://github.com/gomdlint/gomdlint/wiki)
--  [Issue Tracker](https://github.com/gomdlint/gomdlint/issues)  
--  [Discussions](https://github.com/gomdlint/gomdlint/discussions)
+-  [Documentation](https://github.com/jamesainslie/gomdlint/wiki)
+-  [Issue Tracker](https://github.com/jamesainslie/gomdlint/issues)  
+-  [Discussions](https://github.com/jamesainslie/gomdlint/discussions)
 -  [Email Support](mailto:support@gomdlint.dev)
 
 ---

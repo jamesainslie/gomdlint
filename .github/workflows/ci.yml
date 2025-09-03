@@ -163,6 +163,7 @@ jobs:
         go test -race -coverprofile=coverage.out -covermode=atomic -v ./...
 
     - name: Check test coverage
+      shell: bash
       run: |
         go tool cover -func=coverage.out
         COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')

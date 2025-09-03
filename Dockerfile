@@ -97,9 +97,13 @@ RUN go mod download && go mod verify
 COPY . .
 
 # Build the binary with version injection and optimizations
+# Build arguments for cross-compilation
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+
 RUN CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64 \
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH} \
     go build \
     -ldflags="-w -s -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${BUILD_DATE} -X main.service=${SERVICE}" \
     -a \

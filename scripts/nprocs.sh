@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to detect the number of processors/cores available
-# Based on GEICO basset project's approach with enhanced error handling
+# Cross-platform processor detection with enhanced error handling
 
 set -euo pipefail
 

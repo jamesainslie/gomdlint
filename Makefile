@@ -48,7 +48,7 @@ RESET = \033[0m
 		lint lint-sarif gomdlint fmt goimports deps check security security-sarif govulncheck \
 		release docker docker-security tools-install pre-commit ci-local dev \
 		version-check dependency-check license-check \
-		geico-init geico-build geico-env-check geico-proxy-test geico-compliance
+		env-init release-build env-check proxy-test compliance
 
 ## Default target
 help: ## Show this help message

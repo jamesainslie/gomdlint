@@ -84,7 +84,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: ${{ env.GOLANGCI_LINT_VERSION }}
-        args: --timeout=10m --out-format colored-line-number,sarif:golangci-lint-report.sarif
+        args: --timeout=10m --out-format colored-line-number
 
     - name: Upload golangci-lint SARIF report
       uses: github/codeql-action/upload-sarif@v3

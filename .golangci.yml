@@ -195,6 +195,8 @@ linters-settings:
 
 linters:
   disable-all: true
+  disable:
+    - typecheck     # Disabled - dependency compatibility issues with Go 1.23
   enable:
     # Core Go analyzers
     - errcheck      # Check for unhandled errors
@@ -202,7 +204,6 @@ linters:
     - govet         # Go vet examination
     - ineffassign   # Detect ineffectual assignments
     - staticcheck   # Advanced static analysis
-    # - typecheck     # Type checking (disabled - dependency compatibility issues)
     - unused        # Unused code detection
 
     # Code quality and style

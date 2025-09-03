@@ -189,6 +189,10 @@ func TestGetXDGPaths_ComplexAppName(t *testing.T) {
 }
 
 func TestGetXDGPaths_WindowsStyle(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping XDG Windows-style test on Windows - Windows uses native AppData paths")
+	}
+	
 	// Save original environment
 	originalEnv := map[string]string{
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
@@ -463,12 +467,12 @@ func TestGetWindowsPaths(t *testing.T) {
 	assert.NotEmpty(t, paths.ConfigHome)
 	assert.NotEmpty(t, paths.DataHome)
 	assert.NotEmpty(t, paths.CacheHome)
-	
+
 	// Verify paths contain expected Windows patterns
 	assert.Contains(t, paths.ConfigHome, "AppData")
 	assert.Contains(t, paths.ConfigHome, "testapp")
 	assert.Contains(t, paths.CacheHome, "Local")
-	
+
 	// Config and data should be the same on Windows
 	assert.Equal(t, paths.ConfigHome, paths.DataHome)
 }

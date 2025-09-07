@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/charmbracelet/lipgloss v0.9.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
